@@ -9,33 +9,22 @@ cur_frm.email_field = "email_id";
 frappe.ui.form.on("Job Applicant", {
 	refresh: function(frm) {
 		if (!frm.doc.__islocal) {
-			if (frm.doc.__onload && frm.doc.__onload.job_offer) {
-				$('[data-doctype="Employee Onboarding"]').find("button").show();
-				$('[data-doctype="Job Offer"]').find("button").hide();
-				frm.add_custom_button(__("Job Offer"), function() {
-					frappe.set_route("Form", "Job Offer", frm.doc.__onload.job_offer);
+			if (frm.doc.__onload && frm.doc.__onload.offer_letter) {
+				frm.add_custom_button(__("Offer Letter"), function() {
+					frappe.set_route("Form", "Offer Letter", frm.doc.__onload.offer_letter);
 				}, __("View"));
 			} else {
-				$('[data-doctype="Employee Onboarding"]').find("button").hide();
-				$('[data-doctype="Job Offer"]').find("button").show();
-				frm.add_custom_button(__("Job Offer"), function() {
+				frm.add_custom_button(__("Offer Letter"), function() {
 					frappe.route_options = {
 						"job_applicant": frm.doc.name,
 						"applicant_name": frm.doc.applicant_name,
 						"designation": frm.doc.job_opening,
 					};
-					frappe.new_doc("Job Offer");
-				});
+					frappe.new_doc("Offer Letter");
+				}, __("Make"));
+				cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
 			}
 		}
-
-		frm.set_query("job_title", function() {
-			return {
-				filters: {
-					'status': 'Open'
-				}
-			};
-		});
 
 	}
 });

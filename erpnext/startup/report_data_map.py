@@ -79,7 +79,7 @@ data_map = {
 			"actual_qty as qty", "voucher_type", "voucher_no", "project",
 			"incoming_rate as incoming_rate", "stock_uom", "serial_no",
 			"qty_after_transaction", "valuation_rate"],
-		"order_by": "posting_date, posting_time, creation",
+		"order_by": "posting_date, posting_time, name",
 		"links": {
 			"item_code": ["Item", "name"],
 			"warehouse": ["Warehouse", "name"],
@@ -96,6 +96,17 @@ data_map = {
 		"columns": ["name", "purpose"],
 		"conditions": ["docstatus=1"],
 		"order_by": "posting_date, posting_time, name",
+	},
+	"Production Order": {
+		"columns": ["name", "production_item as item_code",
+			"(qty - produced_qty) as qty",
+			"fg_warehouse as warehouse"],
+		"conditions": ["docstatus=1", "status != 'Stopped'", "ifnull(fg_warehouse, '')!=''",
+			"qty > produced_qty"],
+		"links": {
+			"item_code": ["Item", "name"],
+			"warehouse": ["Warehouse", "name"]
+		},
 	},
 	"Material Request Item": {
 		"columns": ["item.name as name", "item_code", "warehouse",
@@ -208,15 +219,15 @@ data_map = {
 	},
 	"Supplier": {
 		"columns": ["name", "if(supplier_name=name, '', supplier_name) as supplier_name",
-			"supplier_group as parent_supplier_group"],
+			"supplier_type as parent_supplier_type"],
 		"conditions": ["docstatus < 2"],
 		"order_by": "name",
 		"links": {
-			"parent_supplier_group": ["Supplier Group", "name"],
+			"parent_supplier_type": ["Supplier Type", "name"],
 		}
 	},
-	"Supplier Group": {
-		"columns": ["name", "parent_supplier_group"],
+	"Supplier Type": {
+		"columns": ["name"],
 		"conditions": ["docstatus < 2"],
 		"order_by": "name"
 	},
@@ -258,7 +269,7 @@ data_map = {
 	},
 	"Purchase Receipt": {
 		"columns": ["name", "supplier", "posting_date", "company"],
-		"conditions": ["docstatus=1"],
+		"conditions": ["docstatus=1"], 
 		"order_by": "posting_date",
 		"links": {
 			"supplier": ["Supplier", "name"],
@@ -267,7 +278,7 @@ data_map = {
 	},
 	"Purchase Receipt Item[Purchase Analytics]": {
 		"columns": ["name", "parent", "item_code", "stock_qty as qty", "base_net_amount"],
-		"conditions": ["docstatus=1", "ifnull(parent, '')!=''"],
+		"conditions": ["docstatus=1", "ifnull(parent, '')!=''"], 
 		"order_by": "parent",
 		"links": {
 			"parent": ["Purchase Receipt", "name"],
@@ -282,43 +293,9 @@ data_map = {
 	},
 
 	# Manufacturing
-	"Work Order": {
+	"Production Order": {
 		"columns": ["name","status","creation","planned_start_date","planned_end_date","status","actual_start_date","actual_end_date", "modified"],
 		"conditions": ["docstatus = 1"],
 		"order_by": "creation"
-	},
-
-	#Medical
-	"Patient": {
-		"columns": ["name", "creation", "owner", "if(patient_name=name, '', patient_name) as patient_name"],
-		"conditions": ["docstatus < 2"],
-		"order_by": "name",
-		"links": {
-			"owner" : ["User", "name"]
-		}
-	},
-	"Patient Appointment": {
-		"columns": ["name", "appointment_type", "patient", "practitioner", "appointment_date", "department", "status", "company"],
-		"order_by": "name",
-		"links": {
-			"practitioner": ["Healthcare Practitioner", "name"],
-			"appointment_type": ["Appointment Type", "name"]
-		}
-	},
-	"Healthcare Practitioner": {
-		"columns": ["name", "department"],
-		"order_by": "name",
-		"links": {
-			"department": ["Department", "name"],
-		}
-
-	},
-	"Appointment Type": {
-		"columns": ["name"],
-		"order_by": "name"
-	},
-	"Medical Department": {
-		"columns": ["name"],
-		"order_by": "name"
 	}
 }

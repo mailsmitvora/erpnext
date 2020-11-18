@@ -7,8 +7,7 @@ frappe.query_reports["Stock Projected Qty"] = {
 			"fieldname":"company",
 			"label": __("Company"),
 			"fieldtype": "Link",
-			"options": "Company",
-			"default": frappe.defaults.get_user_default("Company")
+			"options": "Company"
 		},
 		{
 			"fieldname":"warehouse",
@@ -20,30 +19,13 @@ frappe.query_reports["Stock Projected Qty"] = {
 			"fieldname":"item_code",
 			"label": __("Item"),
 			"fieldtype": "Link",
-			"options": "Item",
-			"get_query": function() {
-				return {
-					query: "erpnext.controllers.queries.item_query"
-				}
-			}
-		},
-		{
-			"fieldname":"item_group",
-			"label": __("Item Group"),
-			"fieldtype": "Link",
-			"options": "Item Group"
+			"options": "Item"
 		},
 		{
 			"fieldname":"brand",
 			"label": __("Brand"),
 			"fieldtype": "Link",
 			"options": "Brand"
-		},
-		{
-			"fieldname":"include_uom",
-			"label": __("Include UOM"),
-			"fieldtype": "Link",
-			"options": "UOM"
 		}
 	]
 }

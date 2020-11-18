@@ -3,9 +3,7 @@
   "doctype": "Item Price",
   "item_code": "_Test Item",
   "price_list": "_Test Price List",
-  "price_list_rate": 100,
-  "valid_from": "2017-04-18",
-  "valid_upto": "2017-04-26"
+  "price_list_rate": 100
  },
  {
   "doctype": "Item Price",
@@ -17,26 +15,12 @@
   "doctype": "Item Price",
   "item_code": "_Test Item 2",
   "price_list": "_Test Price List Rest of the World",
-  "price_list_rate": 20,
-  "valid_from": "2017-04-18",
-  "valid_upto": "2017-04-26",
-  "customer": "_Test Customer",
-  "uom": "_Test UOM"
+  "price_list_rate": 20
  },
  {
   "doctype": "Item Price",
   "item_code": "_Test Item Home Desktop 100",
   "price_list": "_Test Price List",
-  "price_list_rate": 1000,
-  "valid_from": "2017-04-10",
-  "valid_upto": "2017-04-17"
- },
- {
-  "doctype": "Item Price",
-  "item_code": "_Test Item Home Desktop Manufactured",
-  "price_list": "_Test Price List",
-  "price_list_rate": 1000,
-  "valid_from": "2017-04-10",
-  "valid_upto": "2017-04-17"
+  "price_list_rate": 1000
  }
 ]

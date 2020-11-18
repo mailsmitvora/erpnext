@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 import frappe
 
 def execute():
@@ -6,5 +5,5 @@ def execute():
 	frappe.db.sql("""
 		update `tabCurrency Exchange` 
 		set `date` = '2010-01-01' 
-		where date is null or date = '0000-00-00'
+		where date is null or date = '' or date = '0000-00-00'
 	""")

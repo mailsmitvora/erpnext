@@ -57,8 +57,7 @@ class GlobalDefaults(Document):
 		self.disable_rounded_total = cint(self.disable_rounded_total)
 
 		# Make property setters to hide rounded total fields
-		for doctype in ("Quotation", "Sales Order", "Sales Invoice", "Delivery Note",
-			"Supplier Quotation", "Purchase Order", "Purchase Invoice"):
+		for doctype in ("Quotation", "Sales Order", "Sales Invoice", "Delivery Note"):
 			make_property_setter(doctype, "base_rounded_total", "hidden", self.disable_rounded_total, "Check")
 			make_property_setter(doctype, "base_rounded_total", "print_hide", 1, "Check")
 
@@ -70,6 +69,6 @@ class GlobalDefaults(Document):
 
 		# Make property setters to hide in words fields
 		for doctype in ("Quotation", "Sales Order", "Sales Invoice", "Delivery Note",
-				"Supplier Quotation", "Purchase Order", "Purchase Invoice", "Purchase Receipt"):
+						"Supplier Quotation", "Purchase Order", "Purchase Invoice", "Purchase Receipt"):
 			make_property_setter(doctype, "in_words", "hidden", self.disable_in_words, "Check")
 			make_property_setter(doctype, "in_words", "print_hide", self.disable_in_words, "Check")

@@ -1,6 +1,5 @@
-from __future__ import unicode_literals
 import frappe
-from pymysql import InternalError
+from MySQLdb import OperationalError
 
 def execute():
 	frappe.reload_doctype("Journal Entry Account")
@@ -16,6 +15,6 @@ def execute():
 			frappe.db.sql("""update `tabJournal Entry Account`
 				set reference_type=%s, reference_name={0} where ifnull({0}, '') != ''
 			""".format(fieldname), doctype)
-		except InternalError:
+		except OperationalError:
 			# column not found
 			pass

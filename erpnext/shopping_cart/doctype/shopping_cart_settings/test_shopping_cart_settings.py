@@ -39,4 +39,3 @@ class TestShoppingCartSettings(unittest.TestCase):
 			
 		frappe.db.sql("update `tabTax Rule` set use_for_shopping_cart = 1")
 
-test_dependencies = ["Tax Rule"]

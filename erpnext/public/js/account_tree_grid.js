@@ -18,6 +18,7 @@ erpnext.AccountTreeGrid = frappe.views.TreeGridReport.extend({
 	init: function(wrapper, title) {
 		this._super({
 			title: title,
+			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
 			page: wrapper.page,
 			doctypes: ["Company", "Fiscal Year", "Account", "GL Entry", "Cost Center"],
@@ -36,7 +37,8 @@ erpnext.AccountTreeGrid = frappe.views.TreeGridReport.extend({
 	},
 	setup_columns: function() {
 		this.columns = [
-			{id: "name", name: __("Account"), field: "name", width: 300, cssClass: "cell-title"},
+			{id: "name", name: __("Account"), field: "name", width: 300, cssClass: "cell-title",
+				formatter: this.tree_formatter},
 			{id: "opening_dr", name: __("Opening (Dr)"), field: "opening_dr", width: 100,
 				formatter: this.currency_formatter},
 			{id: "opening_cr", name: __("Opening (Cr)"), field: "opening_cr", width: 100,
@@ -75,8 +77,8 @@ erpnext.AccountTreeGrid = frappe.views.TreeGridReport.extend({
 			var fy = $(this).val();
 			$.each(frappe.report_dump.data["Fiscal Year"], function(i, v) {
 				if (v.name==fy) {
-					me.filter_inputs.from_date.val(frappe.datetime.str_to_user(v.year_start_date));
-					me.filter_inputs.to_date.val(frappe.datetime.str_to_user(v.year_end_date));
+					me.filter_inputs.from_date.val(dateutil.str_to_user(v.year_start_date));
+					me.filter_inputs.to_date.val(dateutil.str_to_user(v.year_end_date));
 				}
 			});
 			me.refresh();
@@ -122,8 +124,8 @@ erpnext.AccountTreeGrid = frappe.views.TreeGridReport.extend({
 		var gl = frappe.report_dump.data['GL Entry'];
 		var me = this;
 
-		this.opening_date = frappe.datetime.user_to_obj(this.filter_inputs.from_date.val());
-		this.closing_date = frappe.datetime.user_to_obj(this.filter_inputs.to_date.val());
+		this.opening_date = dateutil.user_to_obj(this.filter_inputs.from_date.val());
+		this.closing_date = dateutil.user_to_obj(this.filter_inputs.to_date.val());
 		this.set_fiscal_year();
 		if (!this.fiscal_year) return;
 
@@ -133,7 +135,7 @@ erpnext.AccountTreeGrid = frappe.views.TreeGridReport.extend({
 		});
 
 		$.each(gl, function(i, v) {
-			var posting_date = frappe.datetime.str_to_obj(v.posting_date);
+			var posting_date = dateutil.str_to_obj(v.posting_date);
 			var account = me.item_by_name[v.account];
 			me.update_balances(account, posting_date, v);
 		});
@@ -144,7 +146,7 @@ erpnext.AccountTreeGrid = frappe.views.TreeGridReport.extend({
 		// opening
 		if (posting_date < this.opening_date || v.is_opening === "Yes") {
 			if (account.report_type === "Profit and Loss" &&
-				posting_date <= frappe.datetime.str_to_obj(this.fiscal_year[1])) {
+				posting_date <= dateutil.str_to_obj(this.fiscal_year[1])) {
 				// balance of previous fiscal_year should
 				//	not be part of opening of pl account balance
 			} else {
@@ -206,21 +208,21 @@ erpnext.AccountTreeGrid = frappe.views.TreeGridReport.extend({
 
 	set_fiscal_year: function() {
 		if (this.opening_date > this.closing_date) {
-			frappe.msgprint(__("Opening Date should be before Closing Date"));
+			msgprint(__("Opening Date should be before Closing Date"));
 			return;
 		}
 
 		this.fiscal_year = null;
 		var me = this;
 		$.each(frappe.report_dump.data["Fiscal Year"], function(i, v) {
-			if (me.opening_date >= frappe.datetime.str_to_obj(v.year_start_date) &&
-				me.closing_date <= frappe.datetime.str_to_obj(v.year_end_date)) {
-				me.fiscal_year = v;
-			}
+			if (me.opening_date >= dateutil.str_to_obj(v.year_start_date) &&
+				me.closing_date <= dateutil.str_to_obj(v.year_end_date)) {
+					me.fiscal_year = v;
+				}
 		});
 
 		if (!this.fiscal_year) {
-			frappe.msgprint(__("Opening Date and Closing Date should be within same Fiscal Year"));
+			msgprint(__("Opening Date and Closing Date should be within same Fiscal Year"));
 			return;
 		}
 	},

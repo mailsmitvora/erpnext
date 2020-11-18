@@ -1,16 +1,16 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.ui.form.on('Monthly Distribution', {
-	onload(frm) {
-		if(frm.doc.__islocal) {
-			return frm.call('get_months').then(() => {
-				frm.refresh_field('percentages');
-			});
-		}
-	},
+cur_frm.cscript.onload = function(doc,cdt,cdn){
+  if(doc.__islocal){
+    var callback1 = function(r,rt){
+      refresh_field('percentages');
+    }
 
-	refresh(frm) {
-		frm.toggle_display('distribution_id', frm.doc.__islocal);
-	}
-});
+    return $c('runserverobj',args={'method':'get_months', 'docs':doc}, callback1);
+  }
+}
+
+cur_frm.cscript.refresh = function(doc,cdt,cdn){
+	cur_frm.toggle_display('distribution_id', doc.__islocal);
+}

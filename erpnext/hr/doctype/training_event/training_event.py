@@ -4,20 +4,24 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.model.document import Document
 from frappe import _
-from frappe.utils import time_diff_in_seconds
-from erpnext.hr.doctype.employee.employee import get_employee_emails
+from frappe.model.document import Document
 
 class TrainingEvent(Document):
 	def validate(self):
-		self.set_employee_emails()
-		self.validate_period()
-
-	def set_employee_emails(self):
-		self.employee_emails = ', '.join(get_employee_emails([d.employee
-			for d in self.employees]))
-
-	def validate_period(self):
-		if time_diff_in_seconds(self.end_time, self.start_time) <= 0:
-			frappe.throw(_('End time cannot be before start time'))
+		if self.event_status == "Scheduled":
+			self.invite_employee()
+	
+	def on_update_after_submit(self):
+		if self.event_status == "Scheduled" and self.send_email:
+			self.invite_employee()
+	
+	def invite_employee(self):
+		subject = _("""You are invited for to attend {0} - {1} scheduled from {2} to {3} at {4}."""\
+			.format(self.type, self.event_name, self.start_time, self.end_time, self.location))
+	
+		for emp in self.employees:
+			if emp.status== "Open":
+				frappe.sendmail(frappe.db.get_value("Employee", emp.employee, "company_email"), \
+					subject=subject, content= self.introduction)
+				emp.status= "Invited"

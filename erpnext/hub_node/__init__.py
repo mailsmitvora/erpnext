@@ -2,16 +2,16 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, requests
 
 @frappe.whitelist()
-def enable_hub():
-	hub_settings = frappe.get_doc('Marketplace Settings')
-	hub_settings.register()
-	frappe.db.commit()
-	return hub_settings
-
-@frappe.whitelist()
-def sync():
-	hub_settings = frappe.get_doc('Marketplace Settings')
-	hub_settings.sync()
+def get_items(text, start, limit):
+	hub = frappe.get_single("Hub Settings")
+	response = requests.get(hub.hub_url + "/api/method/hub.hub.api.get_items", params={
+		"access_token": hub.access_token,
+		"text": text,
+		"start": start,
+		"limit": limit
+	})
+	response.raise_for_status()
+	return response.json().get("message")

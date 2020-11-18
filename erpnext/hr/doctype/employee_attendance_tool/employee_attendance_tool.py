@@ -6,7 +6,6 @@ from __future__ import unicode_literals
 import frappe
 import json
 from frappe.model.document import Document
-from frappe.utils import getdate
 
 
 class EmployeeAttendanceTool(Document):
@@ -17,12 +16,13 @@ class EmployeeAttendanceTool(Document):
 def get_employees(date, department = None, branch = None, company = None):
 	attendance_not_marked = []
 	attendance_marked = []
-	filters = {"status": "Active", "date_of_joining": ["<=", date]}
-
-	for field, value in {'department': department,
-		'branch': branch, 'company': company}.items():
-		if value:
-			filters[field] = value
+	filters = {"status": "Active"}
+	if department != "All":
+		filters["department"] = department
+	if branch != "All":
+		filters["branch"] = branch
+	if company != "All":
+		filters["company"] = company
 
 	employee_list = frappe.get_list("Employee", fields=["employee", "employee_name"], filters=filters, order_by="employee_name")
 	marked_employee = {}
@@ -44,26 +44,17 @@ def get_employees(date, department = None, branch = None, company = None):
 
 @frappe.whitelist()
 def mark_employee_attendance(employee_list, status, date, leave_type=None, company=None):
-
 	employee_list = json.loads(employee_list)
 	for employee in employee_list:
-
+		attendance = frappe.new_doc("Attendance")
+		attendance.employee = employee['employee']
+		attendance.employee_name = employee['employee_name']
+		attendance.attendance_date = date
+		attendance.status = status
 		if status == "On Leave" and leave_type:
-			leave_type = leave_type
+			attendance.leave_type = leave_type
+		if company:
+			attendance.company = company
 		else:
-			leave_type = None
-
-		if not company:
-			company = frappe.db.get_value("Employee", employee['employee'], "Company")
-
-		attendance=frappe.get_doc(dict(
-			doctype='Attendance',
-			employee=employee.get('employee'),
-			employee_name=employee.get('employee_name'),
-			attendance_date=getdate(date),
-			status=status,
-			leave_type=leave_type,
-			company=company
-		))
-		attendance.insert()
+			attendance.company = frappe.db.get_value("Employee", employee['employee'], "Company")
 		attendance.submit()

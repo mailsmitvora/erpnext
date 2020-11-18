@@ -4,25 +4,18 @@
 from __future__ import unicode_literals
 
 import frappe
+from erpnext.setup.setup_wizard import domainify
 
 def execute():
 	frappe.reload_doctype('Role')
 	for dt in ("assessment", "course", "fees"):
-		# 'Schools' module changed to the 'Education'
-		# frappe.reload_doc("schools", "doctype", dt)
-		frappe.reload_doc("education", "doctype", dt)
-
-	for dt in ("domain", "has_domain", "domain_settings"):
-		frappe.reload_doc("core", "doctype", dt)
+		frappe.reload_doc("schools", "doctype", dt)
 
 	frappe.reload_doc('website', 'doctype', 'portal_menu_item')
 
 	frappe.get_doc('Portal Settings').sync_menu()
 
 	if 'schools' in frappe.get_installed_apps():
-		domain = frappe.get_doc('Domain', 'Education')
-		domain.setup_domain()
+		domainify.setup_domain('Education')
 	else:
-		domain = frappe.get_doc('Domain', 'Manufacturing')
-		domain.setup_data()
-		domain.setup_sidebar_items()
+		domainify.setup_sidebar_items(domainify.get_domain('Manufacturing'))

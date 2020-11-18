@@ -1,8 +1,5 @@
-from __future__ import unicode_literals
 import frappe
 from frappe.model import default_fields
-
-from six import iteritems
 
 def execute():
 	frappe.reload_doc("email", "doctype", "email_account")
@@ -22,7 +19,7 @@ def execute():
 			"use_tls": "use_ssl"
 		}
 
-		for target_fieldname, source_fieldname in iteritems(mapping):
+		for target_fieldname, source_fieldname in mapping.iteritems():
 			account.set(target_fieldname, outgoing.get(source_fieldname))
 
 		account.enable_outgoing = 1
@@ -45,7 +42,7 @@ def execute():
 			"auto_reply_message": "support_autoreply"
 		}
 
-		for target_fieldname, source_fieldname in iteritems(mapping):
+		for target_fieldname, source_fieldname in mapping.iteritems():
 			account.set(target_fieldname, support.get(source_fieldname))
 
 		account.enable_outgoing = 0
@@ -66,7 +63,7 @@ def execute():
 				"use_ssl": "use_ssl",
 			}
 
-			for target_fieldname, source_fieldname in iteritems(mapping):
+			for target_fieldname, source_fieldname in mapping.iteritems():
 				account.set(target_fieldname, source.get(source_fieldname))
 
 			account.enable_outgoing = 0
@@ -81,7 +78,7 @@ def execute():
 def insert_or_update(account):
 	try:
 		account.insert()
-	except frappe.NameError as e:
+	except frappe.NameError, e:
 		if e.args[0]=="Email Account":
 			existing_account = frappe.get_doc("Email Account", e.args[1])
 			for key, value in account.as_dict().items():

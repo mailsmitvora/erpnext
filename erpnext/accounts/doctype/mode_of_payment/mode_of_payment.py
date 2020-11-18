@@ -11,7 +11,6 @@ class ModeofPayment(Document):
 	def validate(self):
 		self.validate_accounts()
 		self.validate_repeating_companies()
-		self.validate_pos_mode_of_payment()
 	
 	def validate_repeating_companies(self):
 		"""Error when Same Company is entered multiple times in accounts"""
@@ -26,17 +25,4 @@ class ModeofPayment(Document):
 		for entry in self.accounts:
 			"""Error when Company of Ledger account doesn't match with Company Selected"""
 			if frappe.db.get_value("Account", entry.default_account, "company") != entry.company:
-				frappe.throw(_("Account {0} does not match with Company {1} in Mode of Account: {2}")
-					.format(entry.default_account, entry.company, self.name))
-
-	def validate_pos_mode_of_payment(self):
-		if not self.enabled:
-			pos_profiles = frappe.db.sql("""SELECT sip.parent FROM `tabSales Invoice Payment` sip 
-				WHERE sip.parenttype = 'POS Profile' and sip.mode_of_payment = %s""", (self.name))
-			pos_profiles = list(map(lambda x: x[0], pos_profiles))
-			
-			if pos_profiles:
-				message = "POS Profile " + frappe.bold(", ".join(pos_profiles)) + " contains \
-					Mode of Payment " + frappe.bold(str(self.name)) + ". Please remove them to disable this mode."
-				frappe.throw(_(message), title="Not Allowed")
-
+				frappe.throw(_("Account does not match with Company"))

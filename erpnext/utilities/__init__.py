@@ -1,8 +1,7 @@
 ## temp utility
-from __future__ import print_function, unicode_literals
+
 import frappe
 from erpnext.utilities.activation import get_level
-from frappe.utils import cstr
 
 def update_doctypes():
 	for d in frappe.db.sql("""select df.parent, df.fieldname
@@ -12,7 +11,7 @@ def update_doctypes():
 
 		for f in dt.fields:
 			if f.fieldname == d.fieldname and f.fieldtype in ("Text", "Small Text"):
-				print(f.parent, f.fieldname)
+				print f.parent, f.fieldname
 				f.fieldtype = "Text Editor"
 				dt.save()
 				break
@@ -27,7 +26,7 @@ def get_site_info(site_info):
 		company = company[0][0] if company else None
 
 	if company:
-		domain = frappe.get_cached_value('Company',  cstr(company),  'domain')
+		domain = frappe.db.get_value('Company', company, 'domain')
 
 	return {
 		'company': company,

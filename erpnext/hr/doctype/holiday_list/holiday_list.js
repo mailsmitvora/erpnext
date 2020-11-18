@@ -3,9 +3,7 @@
 
 frappe.ui.form.on('Holiday List', {
 	refresh: function(frm) {
-		if (frm.doc.holidays) {
-			frm.set_value('total_holidays', frm.doc.holidays.length);
-		}
+
 	},
 	from_date: function(frm) {
 		if (frm.doc.from_date && !frm.doc.to_date) {

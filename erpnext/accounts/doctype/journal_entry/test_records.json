@@ -12,16 +12,14 @@
     "credit_in_account_currency": 400.0,
     "debit_in_account_currency": 0.0,
     "doctype": "Journal Entry Account",
-    "parentfield": "accounts",
-    "cost_center": "_Test Cost Center - _TC"
+    "parentfield": "accounts"
    },
    {
     "account": "_Test Bank - _TC",
     "credit_in_account_currency": 0.0,
     "debit_in_account_currency": 400.0,
     "doctype": "Journal Entry Account",
-    "parentfield": "accounts",
-    "cost_center": "_Test Cost Center - _TC"
+    "parentfield": "accounts"
    }
   ],
   "naming_series": "_T-Journal Entry-",
@@ -44,16 +42,14 @@
     "credit_in_account_currency": 0.0,
     "debit_in_account_currency": 400.0,
     "doctype": "Journal Entry Account",
-    "parentfield": "accounts",
-    "cost_center": "_Test Cost Center - _TC"
+    "parentfield": "accounts"
    },
    {
     "account": "_Test Bank - _TC",
     "credit_in_account_currency": 400.0,
     "debit_in_account_currency": 0.0,
     "doctype": "Journal Entry Account",
-    "parentfield": "accounts",
-    "cost_center": "_Test Cost Center - _TC"
+    "parentfield": "accounts"
    }
   ],
   "naming_series": "_T-Journal Entry-",
@@ -76,8 +72,7 @@
     "credit_in_account_currency": 0.0,
     "debit_in_account_currency": 400.0,
     "doctype": "Journal Entry Account",
-    "parentfield": "accounts",
-    "cost_center": "_Test Cost Center - _TC"
+    "parentfield": "accounts"
    },
    {
     "account": "Sales - _TC",
@@ -85,8 +80,7 @@
     "credit_in_account_currency": 400.0,
     "debit_in_account_currency": 0.0,
     "doctype": "Journal Entry Account",
-    "parentfield": "accounts",
-    "cost_center": "_Test Cost Center - _TC"
+    "parentfield": "accounts"
    }
   ],
   "naming_series": "_T-Journal Entry-",

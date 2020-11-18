@@ -14,12 +14,12 @@
 
 {%- if introduction -%}
 <div>{{ introduction }}</div>
-{% endif %} 
+{% endif %}
 
-{%- if doc.enable_admission_application -%}
+{%- if application_form_route -%}
 <p>
 	<a class='btn btn-primary'
-	href='/student-applicant'>
+	href='/{{ doc.application_form_route }}'>
 	{{ _("Apply Now") }}</a>
 </p>
 {% endif %}

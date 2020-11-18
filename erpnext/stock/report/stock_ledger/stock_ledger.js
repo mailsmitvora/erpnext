@@ -29,30 +29,13 @@ frappe.query_reports["Stock Ledger"] = {
 			"fieldname":"warehouse",
 			"label": __("Warehouse"),
 			"fieldtype": "Link",
-			"options": "Warehouse",
-			"get_query": function() {
-				const company = frappe.query_report.get_filter_value('company');
-				return {
-					filters: { 'company': company }
-				}
-			}
+			"options": "Warehouse"
 		},
 		{
 			"fieldname":"item_code",
 			"label": __("Item"),
 			"fieldtype": "Link",
-			"options": "Item",
-			"get_query": function() {
-				return {
-					query: "erpnext.controllers.queries.item_query"
-				}
-			}
-		},
-		{
-			"fieldname":"item_group",
-			"label": __("Item Group"),
-			"fieldtype": "Link",
-			"options": "Item Group"
+			"options": "Item"
 		},
 		{
 			"fieldname":"batch_no",
@@ -70,34 +53,12 @@ frappe.query_reports["Stock Ledger"] = {
 			"fieldname":"voucher_no",
 			"label": __("Voucher #"),
 			"fieldtype": "Data"
-		},
-		{
-			"fieldname":"project",
-			"label": __("Project"),
-			"fieldtype": "Link",
-			"options": "Project"
-		},
-		{
-			"fieldname":"include_uom",
-			"label": __("Include UOM"),
-			"fieldtype": "Link",
-			"options": "UOM"
-		},
-		{
-			"fieldname": "show_cancelled_entries",
-			"label": __("Show Cancelled Entries"),
-			"fieldtype": "Check"
 		}
-	],
-	"formatter": function (value, row, column, data, default_formatter) {
-		value = default_formatter(value, row, column, data);
-		if (column.fieldname == "out_qty" && data.out_qty < 0) {
-			value = "<span style='color:red'>" + value + "</span>";
-		}
-		else if (column.fieldname == "in_qty" && data.in_qty > 0) {
-			value = "<span style='color:green'>" + value + "</span>";
-		}
-
-		return value;
-	},
+	]
 }
+
+// $(function() {
+// 	$(wrapper).bind("show", function() {
+// 		frappe.query_report.load();
+// 	});
+// });

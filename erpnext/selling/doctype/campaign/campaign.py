@@ -5,11 +5,11 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe.model.document import Document
-from frappe.model.naming import set_name_by_naming_series
+from frappe.model.naming import make_autoname
 
 class Campaign(Document):
 	def autoname(self):
 		if frappe.defaults.get_global_default('campaign_naming_by') != 'Naming Series':
 			self.name = self.campaign_name
 		else:
-			set_name_by_naming_series(self)
+			self.name = make_autoname(self.naming_series+'.#####')

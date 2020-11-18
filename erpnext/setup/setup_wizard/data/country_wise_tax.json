@@ -60,10 +60,14 @@
 	},
 
 	"Australia": {
-		"Australia GST": {
+		"Australia GST1": {
 			"account_name": "GST 10%",
 			"tax_rate": 10.00,
 			"default": 1
+		},
+		"Australia GST 2%": {
+			"account_name": "GST 2%",
+			"tax_rate": 2
 		}
 	},
 
@@ -580,24 +584,16 @@
 	},
 
 	"India": {
-		"In State GST": {
-			"account_name": ["SGST", "CGST"],
-			"tax_rate": [9.00, 9.00],
+		"India VAT 5%": {
+			"account_name": "VAT 5%",
+			"tax_rate": 5.00,
 			"default": 1
 		},
-		"Out of State GST": {
-			"account_name": "IGST",
-			"tax_rate": 18.00
-		},
-		"VAT 5%": {
-			"account_name": "VAT 5%",
-			"tax_rate": 5.00
-		},
-		"VAT 4%": {
+		"India VAT 4%": {
 			"account_name": "VAT 4%",
 			"tax_rate": 4.00
 		},
-		"VAT 14%": {
+		"India VAT 14%": {
 			"account_name": "VAT 14%",
 			"tax_rate": 14.00
 		}
@@ -644,19 +640,10 @@
 	},
 
 	"Italy": {
-		"Italy VAT 22%": {
-			"account_name": "IVA 22%",
-			"tax_rate": 22.00,
-			"default": 1
-		},
-		"Italy VAT 10%":{
-			"account_name": "IVA 10%",
-			"tax_rate": 10.00
-		},
-		"Italy VAT 4%":{
-			"account_name": "IVA 4%",
-			"tax_rate": 4.00
-		}		
+		"Italy Tax": {
+			"account_name": "VAT",
+			"tax_rate": 22.00
+		}
 	},
 
 	"Ivory Coast": {
@@ -1082,29 +1069,6 @@
 		}
 	},
 
-	"Saudi Arabia": {
-		"KSA VAT 5%": {
-			"account_name": "VAT 5%",
-			"tax_rate": 5.00
-		},
-		"KSA VAT Zero": {
-			"account_name": "VAT Zero",
-			"tax_rate": 0.00
-		},
-		"KSA VAT Exempted": {
-			"account_name": "VAT Exempted",
-			"tax_rate": 0.00
-		},
-		"KSA Excise 50%": {
-			"account_name": "Excise 50%",
-			"tax_rate": 50.00
-		},
-		"KSA Excise 100%": {
-			"account_name": "Excise 100%",
-			"tax_rate": 100.00
-		}
-	},
-
 	"Serbia": {
 		"Serbia Tax": {
 			"account_name": "VAT",
@@ -1235,18 +1199,14 @@
 	},
 
 	"Switzerland": {
-		"Switzerland normal VAT": {
-			"account_name": "VAT 7.7%",
-			"tax_rate": 7.70,
+		"Switzerland VAT 8%": {
+			"account_name": "VAT 8%",
+			"tax_rate": 8.00,
 			"default": 1
 		},
-		"Switzerland reduced VAT": {
-			"account_name": "VAT 2.5%",
-			"tax_rate": 2.50
-		},
-		"Switzerland lodging VAT": {
-			"account_name": "VAT 3.7%",
-			"tax_rate": 3.70
+		"Switzerland VAT 2.4%": {
+			"account_name": "VAT 2.4%",
+			"tax_rate": 2.40
 		}
 	},
 
@@ -1340,29 +1300,6 @@
 		"Ukraine Tax": {
 			"account_name": "VAT",
 			"tax_rate": 20.00
-		}
-	},
-
-	"United Arab Emirates": {
-		"UAE VAT 5%": {
-			"account_name": "VAT 5%",
-			"tax_rate": 5.00
-		},
-		"UAE VAT Zero": {
-			"account_name": "VAT Zero",
-			"tax_rate": 0.00
-		},
-		"UAE VAT Exempted": {
-			"account_name": "VAT Exempted",
-			"tax_rate": 0.00
-		},
-		"UAE Excise 50%": {
-			"account_name": "Excise 50%",
-			"tax_rate": 50.00
-		},
-		"UAE Excise 100%": {
-			"account_name": "Excise 100%",
-			"tax_rate": 100.00
 		}
 	},
 

@@ -7,7 +7,6 @@ from __future__ import unicode_literals
 import frappe
 
 @frappe.whitelist()
-@frappe.validate_and_sanitize_search_inputs
 def query_task(doctype, txt, searchfield, start, page_len, filters):
 	from frappe.desk.reportview import build_match_conditions
 
@@ -24,6 +23,6 @@ def query_task(doctype, txt, searchfield, start, page_len, filters):
 			`%s`,
 			subject
 		limit %s, %s""" %
-		(searchfield, "%s", "%s", match_conditions, "%s",
-			searchfield, "%s", searchfield, "%s", "%s"),
+		(frappe.db.escape(searchfield), "%s", "%s", match_conditions, "%s",
+			frappe.db.escape(searchfield), "%s", frappe.db.escape(searchfield), "%s", "%s"),
 		(search_string, search_string, order_by_string, order_by_string, start, page_len))

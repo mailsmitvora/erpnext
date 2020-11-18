@@ -6,8 +6,7 @@
 		"item_attribute_values": [
 			{"attribute_value": "Small", "abbr": "S"},
 			{"attribute_value": "Medium", "abbr": "M"},
-			{"attribute_value": "Large", "abbr": "L"},
-			{"attribute_value": "Extra Small", "abbr": "XSL"}
+			{"attribute_value": "Large", "abbr": "L"}
 		]
 	},
 	{

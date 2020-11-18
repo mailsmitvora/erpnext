@@ -2,341 +2,144 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
+import frappe
 from frappe import _
 from frappe.utils import flt
-from erpnext.accounts.report.item_wise_sales_register.item_wise_sales_register import (get_tax_accounts,
-	get_grand_total, add_total_row, get_display_value, get_group_by_and_display_fields, add_sub_total_row,
-	get_group_by_conditions)
 
 def execute(filters=None):
-	return _execute(filters)
-
-def _execute(filters=None, additional_table_columns=None, additional_query_columns=None):
 	if not filters: filters = {}
-	columns = get_columns(additional_table_columns, filters)
+	columns = get_columns()
+	last_col = len(columns)
 
-	company_currency = erpnext.get_company_currency(filters.company)
-
-	item_list = get_items(filters, additional_query_columns)
+	item_list = get_items(filters)
 	aii_account_map = get_aii_accounts()
 	if item_list:
-		itemised_tax, tax_columns = get_tax_accounts(item_list, columns, company_currency,
-			doctype="Purchase Invoice", tax_doctype="Purchase Taxes and Charges")
+		item_row_tax, tax_accounts = get_tax_accounts(item_list, columns)
 
-	po_pr_map = get_purchase_receipts_against_purchase_order(item_list)
-
+	columns.append({
+		"fieldname": "currency",
+		"label": _("Currency"),
+		"fieldtype": "Data",
+		"width": 80
+	})
+	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
+	
 	data = []
-	total_row_map = {}
-	skip_total_row = 0
-	prev_group_by_value = ''
-
-	if filters.get('group_by'):
-		grand_total = get_grand_total(filters, 'Purchase Invoice')
-
 	for d in item_list:
-		if not d.stock_qty:
-			continue
-
 		purchase_receipt = None
 		if d.purchase_receipt:
 			purchase_receipt = d.purchase_receipt
 		elif d.po_detail:
-			purchase_receipt = ", ".join(po_pr_map.get(d.po_detail, []))
+			purchase_receipt = ", ".join(frappe.db.sql_list("""select distinct parent
+			from `tabPurchase Receipt Item` where docstatus=1 and purchase_order_item=%s""", d.po_detail))
 
 		expense_account = d.expense_account or aii_account_map.get(d.company)
+		row = [d.item_code, d.item_name, d.item_group, d.parent, d.posting_date, d.supplier,
+			d.supplier_name, d.credit_to, d.mode_of_payment, d.project, d.company, d.purchase_order,
+			purchase_receipt, expense_account, d.qty, d.base_net_rate, d.base_net_amount]
 
-		row = {
-			'item_code': d.item_code,
-			'item_name': d.item_name,
-			'item_group': d.item_group,
-			'description': d.description,
-			'invoice': d.parent,
-			'posting_date': d.posting_date,
-			'supplier': d.supplier,
-			'supplier_name': d.supplier_name
-		}
+		for tax in tax_accounts:
+			row.append(item_row_tax.get(d.name, {}).get(tax, 0))
 
-		if additional_query_columns:
-			for col in additional_query_columns:
-				row.update({
-					col: d.get(col)
-				})
-
-		row.update({
-			'credit_to': d.credit_to,
-			'mode_of_payment': d.mode_of_payment,
-			'project': d.project,
-			'company': d.company,
-			'purchase_order': d.purchase_order,
-			'purchase_receipt': d.purchase_receipt,
-			'expense_account': expense_account,
-			'stock_qty': d.stock_qty,
-			'stock_uom': d.stock_uom,
-			'rate': d.base_net_amount / d.stock_qty,
-			'amount': d.base_net_amount
-		})
-
-		total_tax = 0
-		for tax in tax_columns:
-			item_tax = itemised_tax.get(d.name, {}).get(tax, {})
-			row.update({
-				frappe.scrub(tax + ' Rate'): item_tax.get("tax_rate", 0),
-				frappe.scrub(tax + ' Amount'): item_tax.get("tax_amount", 0),
-			})
-			total_tax += flt(item_tax.get("tax_amount"))
-
-		row.update({
-			'total_tax': total_tax,
-			'total': d.base_net_amount + total_tax,
-			'currency': company_currency
-		})
-
-		if filters.get('group_by'):
-			row.update({'percent_gt': flt(row['total']/grand_total) * 100})
-			group_by_field, subtotal_display_field = get_group_by_and_display_fields(filters)
-			data, prev_group_by_value = add_total_row(data, filters, prev_group_by_value, d, total_row_map,
-				group_by_field, subtotal_display_field, grand_total, tax_columns)
-			add_sub_total_row(row, total_row_map, d.get(group_by_field, ''), tax_columns)
+		total_tax = sum(row[last_col:])
+		row += [total_tax, d.base_net_amount + total_tax, company_currency]
 
 		data.append(row)
 
-	if filters.get('group_by') and item_list:
-		total_row = total_row_map.get(prev_group_by_value or d.get('item_name'))
-		total_row['percent_gt'] = flt(total_row['total']/grand_total * 100)
-		data.append(total_row)
-		data.append({})
-		add_sub_total_row(total_row, total_row_map, 'total_row', tax_columns)
-		data.append(total_row_map.get('total_row'))
-		skip_total_row = 1
-
-	return columns, data, None, None, None, skip_total_row
+	return columns, data
 
 
-def get_columns(additional_table_columns, filters):
-
-	columns = []
-
-	if filters.get('group_by') != ('Item'):
-		columns.extend(
-			[
-				{
-					'label': _('Item Code'),
-					'fieldname': 'item_code',
-					'fieldtype': 'Link',
-					'options': 'Item',
-					'width': 120
-				},
-				{
-					'label': _('Item Name'),
-					'fieldname': 'item_name',
-					'fieldtype': 'Data',
-					'width': 120
-				}
-			]
-		)
-
-	if filters.get('group_by') not in ('Item', 'Item Group'):
-		columns.extend([
-			{
-				'label': _('Item Group'),
-				'fieldname': 'item_group',
-				'fieldtype': 'Link',
-				'options': 'Item Group',
-				'width': 120
-			}
-		])
-
-	columns.extend([
-		{
-			'label': _('Description'),
-			'fieldname': 'description',
-			'fieldtype': 'Data',
-			'width': 150
-		},
-		{
-			'label': _('Invoice'),
-			'fieldname': 'invoice',
-			'fieldtype': 'Link',
-			'options': 'Purchase Invoice',
-			'width': 120
-		},
-		{
-			'label': _('Posting Date'),
-			'fieldname': 'posting_date',
-			'fieldtype': 'Date',
-			'width': 120
-		}
-	])
-
-	if filters.get('group_by') != 'Supplier':
-		columns.extend([
-			{
-				'label': _('Supplier'),
-				'fieldname': 'supplier',
-				'fieldtype': 'Link',
-				'options': 'Supplier',
-				'width': 120
-			},
-			{
-				'label': _('Supplier Name'),
-				'fieldname': 'supplier_name',
-				'fieldtype': 'Data',
-				'width': 120
-			}
-		])
-
-	if additional_table_columns:
-		columns += additional_table_columns
-
-	columns += [
-		{
-			'label': _('Payable Account'),
-			'fieldname': 'credit_to',
-			'fieldtype': 'Link',
-			'options': 'Account',
-			'width': 80
-		},
-		{
-			'label': _('Mode Of Payment'),
-			'fieldname': 'mode_of_payment',
-			'fieldtype': 'Link',
-			'options': 'Mode of Payment',
-			'width': 120
-		},
-		{
-			'label': _('Project'),
-			'fieldname': 'project',
-			'fieldtype': 'Link',
-			'options': 'Project',
-			'width': 80
-		},
-		{
-			'label': _('Company'),
-			'fieldname': 'company',
-			'fieldtype': 'Link',
-			'options': 'Company',
-			'width': 80
-		},
-		{
-			'label': _('Purchase Order'),
-			'fieldname': 'purchase_order',
-			'fieldtype': 'Link',
-			'options': 'Purchase Order',
-			'width': 100
-		},
-		{
-			'label': _("Purchase Receipt"),
-			'fieldname': 'Purchase Receipt',
-			'fieldtype': 'Link',
-			'options': 'Purchase Receipt',
-			'width': 100
-		},
-		{
-			'label': _('Expense Account'),
-			'fieldname': 'expense_account',
-			'fieldtype': 'Link',
-			'options': 'Account',
-			'width': 100
-		},
-		{
-			'label': _('Stock Qty'),
-			'fieldname': 'stock_qty',
-			'fieldtype': 'Float',
-			'width': 100
-		},
-		{
-			'label': _('Stock UOM'),
-			'fieldname': 'stock_uom',
-			'fieldtype': 'Link',
-			'options': 'UOM',
-			'width': 100
-		},
-		{
-			'label': _('Rate'),
-			'fieldname': 'rate',
-			'fieldtype': 'Float',
-			'options': 'currency',
-			'width': 100
-		},
-		{
-			'label': _('Amount'),
-			'fieldname': 'amount',
-			'fieldtype': 'Currency',
-			'options': 'currency',
-			'width': 100
-		}
+def get_columns():
+	return [_("Item Code") + ":Link/Item:120", _("Item Name") + "::120",
+		_("Item Group") + ":Link/Item Group:100", _("Invoice") + ":Link/Purchase Invoice:120",
+		_("Posting Date") + ":Date:80", _("Supplier") + ":Link/Supplier:120",
+		"Supplier Name::120", "Payable Account:Link/Account:120", 
+		_("Mode of Payment") + ":Link/Mode of Payment:80", _("Project") + ":Link/Project:80",
+		_("Company") + ":Link/Company:100", _("Purchase Order") + ":Link/Purchase Order:100",
+		_("Purchase Receipt") + ":Link/Purchase Receipt:100", _("Expense Account") + ":Link/Account:140",
+		_("Qty") + ":Float:120", _("Rate") + ":Currency/currency:120", _("Amount") + ":Currency/currency:120"
 	]
-
-	if filters.get('group_by'):
-		columns.append({
-			'label': _('% Of Grand Total'),
-			'fieldname': 'percent_gt',
-			'fieldtype': 'Float',
-			'width': 80
-		})
-
-	return columns
 
 def get_conditions(filters):
 	conditions = ""
 
 	for opts in (("company", " and company=%(company)s"),
-		("supplier", " and `tabPurchase Invoice`.supplier = %(supplier)s"),
-		("item_code", " and `tabPurchase Invoice Item`.item_code = %(item_code)s"),
-		("from_date", " and `tabPurchase Invoice`.posting_date>=%(from_date)s"),
-		("to_date", " and `tabPurchase Invoice`.posting_date<=%(to_date)s"),
+		("supplier", " and pi.supplier = %(supplier)s"),
+		("item_code", " and pi_item.item_code = %(item_code)s"),
+		("from_date", " and pi.posting_date>=%(from_date)s"),
+		("to_date", " and pi.posting_date<=%(to_date)s"),
 		("mode_of_payment", " and ifnull(mode_of_payment, '') = %(mode_of_payment)s")):
 			if filters.get(opts[0]):
 				conditions += opts[1]
 
-	if not filters.get("group_by"):
-		conditions += "ORDER BY `tabPurchase Invoice`.posting_date desc, `tabPurchase Invoice Item`.item_code desc"
-	else:
-		conditions += get_group_by_conditions(filters, 'Purchase Invoice')
-
 	return conditions
 
-def get_items(filters, additional_query_columns):
+def get_items(filters):
 	conditions = get_conditions(filters)
-
-	if additional_query_columns:
-		additional_query_columns = ', ' + ', '.join(additional_query_columns)
-	else:
-		additional_query_columns = ''
+	match_conditions = frappe.build_match_conditions("Purchase Invoice")
 
 	return frappe.db.sql("""
-		select
-			`tabPurchase Invoice Item`.`name`, `tabPurchase Invoice Item`.`parent`,
-			`tabPurchase Invoice`.posting_date, `tabPurchase Invoice`.credit_to, `tabPurchase Invoice`.company,
-			`tabPurchase Invoice`.supplier, `tabPurchase Invoice`.remarks, `tabPurchase Invoice`.base_net_total, `tabPurchase Invoice Item`.`item_code`,
-			`tabPurchase Invoice Item`.`item_name`, `tabPurchase Invoice Item`.`item_group`, `tabPurchase Invoice Item`.description,
-			`tabPurchase Invoice Item`.`project`, `tabPurchase Invoice Item`.`purchase_order`,
-			`tabPurchase Invoice Item`.`purchase_receipt`, `tabPurchase Invoice Item`.`po_detail`,
-			`tabPurchase Invoice Item`.`expense_account`, `tabPurchase Invoice Item`.`stock_qty`,
-			`tabPurchase Invoice Item`.`stock_uom`, `tabPurchase Invoice Item`.`base_net_amount`,
-			`tabPurchase Invoice`.`supplier_name`, `tabPurchase Invoice`.`mode_of_payment` {0}
-		from `tabPurchase Invoice`, `tabPurchase Invoice Item`
-		where `tabPurchase Invoice`.name = `tabPurchase Invoice Item`.`parent` and
-		`tabPurchase Invoice`.docstatus = 1 %s
-	""".format(additional_query_columns) % (conditions), filters, as_dict=1)
+		select 
+			pi_item.name, pi_item.parent, pi.posting_date, pi.credit_to, pi.company,
+			pi.supplier, pi.remarks, pi.base_net_total, pi_item.item_code, pi_item.item_name, 
+			pi_item.item_group, pi_item.project, pi_item.purchase_order, pi_item.purchase_receipt, 
+			pi_item.po_detail, pi_item.expense_account, pi_item.qty, pi_item.base_net_rate, 
+			pi_item.base_net_amount, pi.supplier_name, pi.mode_of_payment
+		from `tabPurchase Invoice` pi, `tabPurchase Invoice Item` pi_item
+		where pi.name = pi_item.parent and pi.docstatus = 1 %s %s
+		order by pi.posting_date desc, pi_item.item_code desc
+	""" % (conditions, match_conditions), filters, as_dict=1)
 
 def get_aii_accounts():
 	return dict(frappe.db.sql("select name, stock_received_but_not_billed from tabCompany"))
 
-def get_purchase_receipts_against_purchase_order(item_list):
-	po_pr_map = frappe._dict()
-	po_item_rows = list(set([d.po_detail for d in item_list]))
+def get_tax_accounts(item_list, columns):
+	import json
+	item_row_tax = {}
+	tax_accounts = []
+	invoice_item_row = {}
+	item_row_map = {}
+	for d in item_list:
+		invoice_item_row.setdefault(d.parent, []).append(d)
+		item_row_map.setdefault(d.parent, {}).setdefault(d.item_code, []).append(d)
 
-	if po_item_rows:
-		purchase_receipts = frappe.db.sql("""
-			select parent, purchase_order_item
-			from `tabPurchase Receipt Item`
-			where docstatus=1 and purchase_order_item in (%s)
-			group by purchase_order_item, parent
-		""" % (', '.join(['%s']*len(po_item_rows))), tuple(po_item_rows), as_dict=1)
+	tax_details = frappe.db.sql("""
+		select 
+			parent, account_head, item_wise_tax_detail, charge_type, base_tax_amount_after_discount_amount
+		from `tabPurchase Taxes and Charges` 
+		where parenttype = 'Purchase Invoice' and docstatus = 1 
+			and (account_head is not null and account_head != '') 
+			and category in ('Total', 'Valuation and Total')
+			and parent in (%s)
+		""" % ', '.join(['%s']*len(invoice_item_row)), tuple(invoice_item_row.keys()))
 
-		for pr in purchase_receipts:
-			po_pr_map.setdefault(pr.po_detail, []).append(pr.parent)
+	for parent, account_head, item_wise_tax_detail, charge_type, tax_amount in tax_details:
+		if account_head not in tax_accounts:
+			tax_accounts.append(account_head)
 
-	return po_pr_map
+		if item_wise_tax_detail:
+			try:
+				item_wise_tax_detail = json.loads(item_wise_tax_detail)
+				
+				for item_code, tax_amount in item_wise_tax_detail.items():
+					tax_amount = flt(tax_amount[1]) if isinstance(tax_amount, list) else flt(tax_amount)
+					
+					item_net_amount = sum([flt(d.base_net_amount) 
+						for d in item_row_map.get(parent, {}).get(item_code, [])])
+					
+					for d in item_row_map.get(parent, {}).get(item_code, []):
+						item_tax_amount = flt((tax_amount * d.base_net_amount) / item_net_amount) if item_net_amount else 0
+						item_row_tax.setdefault(d.name, {})[account_head] = item_tax_amount
+						
+			except ValueError:
+				continue
+		elif charge_type == "Actual" and tax_amount:
+			for d in invoice_item_row.get(parent, []):
+				item_row_tax.setdefault(d.name, {})[account_head] = \
+					flt((tax_amount * d.base_net_amount) / d.base_net_total)
+
+	tax_accounts.sort()
+	columns += [account_head + ":Currency/currency:80" for account_head in tax_accounts]
+	columns += ["Total Tax:Currency/currency:80", "Total:Currency/currency:80"]
+
+	return item_row_tax, tax_accounts
