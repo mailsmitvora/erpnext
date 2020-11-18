@@ -7,14 +7,15 @@ frappe.query_reports["Item-wise Purchase Register"] = {
 			"fieldname":"from_date",
 			"label": __("From Date"),
 			"fieldtype": "Date",
-			"default": frappe.defaults.get_user_default("year_start_date"),
-			"width": "80"
+			"default": frappe.datetime.add_months(frappe.datetime.get_today(), -1),
+			"reqd": 1,
 		},
 		{
 			"fieldname":"to_date",
 			"label": __("To Date"),
 			"fieldtype": "Date",
-			"default": get_today()
+			"default": frappe.datetime.get_today(),
+			"reqd": 1,
 		},
 		{
 			"fieldname": "item_code",
@@ -40,6 +41,20 @@ frappe.query_reports["Item-wise Purchase Register"] = {
 			"label": __("Mode of Payment"),
 			"fieldtype": "Link",
 			"options": "Mode of Payment"
+		},
+		{
+			"label": __("Group By"),
+			"fieldname": "group_by",
+			"fieldtype": "Select",
+			"options": ["Supplier", "Item Group", "Item", "Invoice"]
 		}
-	]
+	],
+	"formatter": function(value, row, column, data, default_formatter) {
+		value = default_formatter(value, row, column, data);
+		if (data && data.bold) {
+			value = value.bold();
+
+		}
+		return value;
+	}
 }

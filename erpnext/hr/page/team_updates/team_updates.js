@@ -8,9 +8,9 @@ frappe.pages['team-updates'].on_page_load = function(wrapper) {
 	frappe.team_updates.make(page);
 	frappe.team_updates.run();
 
-	if(frappe.model.can_read('Daily Work Summary Settings')) {
-		page.add_menu_item(__('Daily Work Summary Settings'), function() {
-			frappe.set_route('Form', 'Daily Work Summary Settings');
+	if(frappe.model.can_read('Daily Work Summary Group')) {
+		page.add_menu_item(__('Daily Work Summary Group'), function() {
+			frappe.set_route('Form', 'Daily Work Summary Group');
 		});
 	}
 }
@@ -54,17 +54,18 @@ frappe.team_updates = {
 		data.avatar = frappe.avatar(data.sender);
 		data.when = comment_when(data.creation);
 
-		var date = dateutil.str_to_obj(data.creation);
+		var date = frappe.datetime.str_to_obj(data.creation);
 		var last = me.last_feed_date;
 
-		if((last && dateutil.obj_to_str(last) != dateutil.obj_to_str(date)) || (!last)) {
-			var diff = dateutil.get_day_diff(dateutil.get_today(), dateutil.obj_to_str(date));
+		if((last && frappe.datetime.obj_to_str(last) != frappe.datetime.obj_to_str(date)) || (!last)) {
+			var diff = frappe.datetime.get_day_diff(frappe.datetime.get_today(), frappe.datetime.obj_to_str(date));
+			var pdate;
 			if(diff < 1) {
 				pdate = 'Today';
 			} else if(diff < 2) {
 				pdate = 'Yesterday';
 			} else {
-				pdate = dateutil.global_date_format(date);
+				pdate = frappe.datetime.global_date_format(date);
 			}
 			data.date_sep = pdate;
 			data.date_class = pdate=='Today' ? "date-indicator blue" : "date-indicator";

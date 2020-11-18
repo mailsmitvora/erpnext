@@ -1,265 +1,220 @@
+# coding=utf-8
+
 from __future__ import unicode_literals
 from frappe import _
 
 def get_data():
 	return [
+		# Modules
 		{
-			"module_name": "Item",
-			"_doctype": "Item",
-			"color": "#f39c12",
-			"icon": "octicon octicon-package",
-			"type": "link",
-			"link": "List/Item"
-		},
-		{
-			"module_name": "Customer",
-			"_doctype": "Customer",
+			"module_name": "Getting Started",
+			"category": "Modules",
+			"label": _("Getting Started"),
 			"color": "#1abc9c",
-			"icon": "octicon octicon-tag",
-			"type": "link",
-			"link": "List/Customer"
-		},
-		{
-			"module_name": "Supplier",
-			"_doctype": "Supplier",
-			"color": "#c0392b",
-			"icon": "octicon octicon-briefcase",
-			"type": "link",
-			"link": "List/Supplier"
-		},
-		{
-			"_doctype": "Employee",
-			"module_name": "Employee",
-			"color": "#2ecc71",
-			"icon": "octicon octicon-organization",
-			"type": "link",
-			"link": "List/Employee"
-		},
-		{
-			"module_name": "Project",
-			"_doctype": "Project",
-			"color": "#8e44ad",
-			"icon": "octicon octicon-rocket",
-			"type": "link",
-			"link": "List/Project"
-		},
-		{
-			"module_name": "Issue",
-			"color": "#2c3e50",
-			"icon": "octicon octicon-issue-opened",
-			"_doctype": "Issue",
-			"type": "link",
-			"link": "List/Issue"
-		},
-		{
-			"module_name": "Lead",
-			"icon": "octicon octicon-broadcast",
+			"icon": "fa fa-check-square-o",
 			"type": "module",
-			"_doctype": "Lead",
-			"type": "link",
-			"link": "List/Lead"
+			"disable_after_onboard": 1,
+			"description": "Dive into the basics for your organisation's needs.",
+			"onboard_present": 1
 		},
-		{
-			"module_name": "Profit and Loss Statement",
-			"_doctype": "Account",
-			"color": "#3498db",
-			"icon": "octicon octicon-repo",
-			"type": "link",
-			"link": "query-report/Profit and Loss Statement"
-		},
-
-		# old
 		{
 			"module_name": "Accounts",
+			"category": "Modules",
+			"label": _("Accounting"),
 			"color": "#3498db",
 			"icon": "octicon octicon-repo",
 			"type": "module",
-			"hidden": 1
-		},
-		{
-			"module_name": "Stock",
-			"color": "#f39c12",
-			"icon": "fa fa-truck",
-			"icon": "octicon octicon-package",
-			"type": "module",
-			"hidden": 1
-		},
-		{
-			"module_name": "CRM",
-			"color": "#EF4DB6",
-			"icon": "octicon octicon-broadcast",
-			"type": "module",
-			"hidden": 1
+			"description": "Accounts, billing, payments, cost center and budgeting."
 		},
 		{
 			"module_name": "Selling",
+			"category": "Modules",
+			"label": _("Selling"),
 			"color": "#1abc9c",
-			"icon": "fa fa-tag",
 			"icon": "octicon octicon-tag",
 			"type": "module",
-			"hidden": 1
+			"description": "Sales orders, quotations, customers and items."
 		},
 		{
 			"module_name": "Buying",
+			"category": "Modules",
+			"label": _("Buying"),
 			"color": "#c0392b",
-			"icon": "fa fa-shopping-cart",
 			"icon": "octicon octicon-briefcase",
 			"type": "module",
-			"hidden": 1
+			"description": "Purchasing, suppliers, material requests, and items."
 		},
 		{
-			"module_name": "HR",
-			"color": "#2ecc71",
-			"icon": "fa fa-group",
-			"icon": "octicon octicon-organization",
-			"label": _("Human Resources"),
+			"module_name": "Stock",
+			"category": "Modules",
+			"label": _("Stock"),
+			"color": "#f39c12",
+			"icon": "octicon octicon-package",
 			"type": "module",
-			"hidden": 1
+			"description": "Stock transactions, reports, serial numbers and batches."
 		},
 		{
-			"module_name": "Manufacturing",
-			"color": "#7f8c8d",
-			"icon": "fa fa-cogs",
-			"icon": "octicon octicon-tools",
+			"module_name": "Assets",
+			"category": "Modules",
+			"label": _("Assets"),
+			"color": "#4286f4",
+			"icon": "octicon octicon-database",
 			"type": "module",
-			"hidden": 1
-		},
-		{
-			"module_name": "POS",
-			"color": "#589494",
-			"icon": "fa fa-th",
-			"icon": "octicon octicon-credit-card",
-			"type": "page",
-			"link": "pos",
-			"label": _("POS")
+			"description": "Asset movement, maintainance and tools."
 		},
 		{
 			"module_name": "Projects",
+			"category": "Modules",
+			"label": _("Projects"),
 			"color": "#8e44ad",
-			"icon": "fa fa-puzzle-piece",
 			"icon": "octicon octicon-rocket",
 			"type": "module",
-			"hidden": 1
+			"description": "Updates, Timesheets and Activities."
+		},
+		{
+			"module_name": "CRM",
+			"category": "Modules",
+			"label": _("CRM"),
+			"color": "#EF4DB6",
+			"icon": "octicon octicon-broadcast",
+			"type": "module",
+			"description": "Sales pipeline, leads, opportunities and customers."
+		},
+		{
+			"module_name": "Loan Management",
+			"category": "Modules",
+			"label": _("Loan Management"),
+			"color": "#EF4DB6",
+			"icon": "octicon octicon-repo",
+			"type": "module",
+			"description": "Loan Management for Customer and Employees"
 		},
 		{
 			"module_name": "Support",
-			"color": "#2c3e50",
-			"icon": "fa fa-phone",
-			"icon": "octicon octicon-issue-opened",
+			"category": "Modules",
+			"label": _("Support"),
+			"color": "#1abc9c",
+			"icon": "fa fa-check-square-o",
 			"type": "module",
-			"hidden": 1
+			"description": "User interactions, support issues and knowledge base."
 		},
 		{
-			"module_name": "Learn",
+			"module_name": "HR",
+			"category": "Modules",
+			"label": _("Human Resources"),
+			"color": "#2ecc71",
+			"icon": "octicon octicon-organization",
+			"type": "module",
+			"description": "Employees, attendance, payroll, leaves and shifts."
+		},
+		{
+			"module_name": "Quality Management",
+			"category": "Modules",
+			"label": _("Quality"),
+			"color": "#1abc9c",
+			"icon": "fa fa-check-square-o",
+			"type": "module",
+			"description": "Quality goals, procedures, reviews and action."
+		},
+
+
+		# Category: "Domains"
+		{
+			"module_name": "Manufacturing",
+			"category": "Domains",
+			"label": _("Manufacturing"),
+			"color": "#7f8c8d",
+			"icon": "octicon octicon-tools",
+			"type": "module",
+			"description": "BOMS, work orders, operations, and timesheets."
+		},
+		{
+			"module_name": "Retail",
+			"category": "Domains",
+			"label": _("Retail"),
+			"color": "#7f8c8d",
+			"icon": "octicon octicon-credit-card",
+			"type": "module",
+			"description": "Point of Sale and cashier closing."
+		},
+		{
+			"module_name": "Education",
+			"category": "Domains",
+			"label": _("Education"),
+			"color": "#428B46",
+			"icon": "octicon octicon-mortar-board",
+			"type": "module",
+			"description": "Student admissions, fees, courses and scores."
+		},
+
+		{
+			"module_name": "Healthcare",
+			"category": "Domains",
+			"label": _("Healthcare"),
+			"color": "#FF888B",
+			"icon": "fa fa-heartbeat",
+			"type": "module",
+			"description": "Patient appointments, procedures and tests."
+		},
+		{
+			"module_name": "Agriculture",
+			"category": "Domains",
+			"label": _("Agriculture"),
+			"color": "#8BC34A",
+			"icon": "octicon octicon-globe",
+			"type": "module",
+			"description": "Crop cycles, land areas, soil and plant analysis."
+		},
+		{
+			"module_name": "Hotels",
+			"category": "Domains",
+			"label": _("Hotels"),
+			"color": "#EA81E8",
+			"icon": "fa fa-bed",
+			"type": "module",
+			"description": "Hotel rooms, pricing, reservation and amenities."
+		},
+
+		{
+			"module_name": "Non Profit",
+			"category": "Domains",
+			"label": _("Non Profit"),
+			"color": "#DE2B37",
+			"icon": "octicon octicon-heart",
+			"type": "module",
+			"description": "Volunteers, memberships, grants and chapters."
+		},
+		{
+			"module_name": "Restaurant",
+			"category": "Domains",
+			"label": _("Restaurant"),
+			"color": "#EA81E8",
+			"icon": "fa fa-cutlery",
+			"_doctype": "Restaurant",
+			"type": "module",
+			"link": "List/Restaurant",
+			"description": "Menu, Orders and Table Reservations."
+		},
+
+		{
+			"module_name": "Help",
+			"category": "Administration",
+			"label": _("Learn"),
 			"color": "#FF888B",
 			"icon": "octicon octicon-device-camera-video",
 			"type": "module",
 			"is_help": True,
-			"label": _("Learn"),
-			"hidden": 1
+			"description": "Explore Help Articles and Videos."
 		},
 		{
-			"module_name": "Maintenance",
-			"color": "#FF888B",
-			"icon": "octicon octicon-tools",
-			"type": "module",
-			"label": _("Maintenance")
+			"module_name": 'Marketplace',
+			"category": "Places",
+			"label": _('Marketplace'),
+			"icon": "octicon octicon-star",
+			"type": 'link',
+			"link": '#marketplace/home',
+			"color": '#FF4136',
+			'standard': 1,
+			"description": "Publish items to other ERPNext users."
 		},
-		{
-			"module_name": "Student",
-			"color": "#c0392b",
-			"icon": "octicon octicon-person",
-			"label": _("Student"),
-			"link": "List/Student",
-			"_doctype": "Student",
-			"type": "list"
-		},
-		{
-			"module_name": "Student Group",
-			"color": "#d59919",
-			"icon": "octicon octicon-organization",
-			"label": _("Student Group"),
-			"link": "List/Student Group",
-			"_doctype": "Student Group",
-			"type": "list"
-		},
-		{
-			"module_name": "Course Schedule",
-			"color": "#fd784f",
-			"icon": "octicon octicon-calendar",
-			"label": _("Course Schedule"),
-			"link": "Calendar/Course Schedule",
-			"_doctype": "Course Schedule",
-			"type": "list"
-		},
-		{
-			"module_name": "Student Attendance",
-			"color": "#3aacba",
-			"icon": "octicon octicon-checklist",
-			"label": _("Student Attendance"),
-			"link": "List/Student Attendance",
-			"_doctype": "Student Attendance",
-			"type": "list"
-		},
-		{
-			"module_name": "Course",
-			"color": "#8e44ad",
-			"icon": "octicon octicon-book",
-			"label": _("Course"),
-			"link": "List/Course",
-			"_doctype": "Course",
-			"type": "list"
-		},
-		{
-			"module_name": "Program",
-			"color": "#9b59b6",
-			"icon": "octicon octicon-repo",
-			"label": _("Program"),
-			"link": "List/Program",
-			"_doctype": "Program",
-			"type": "list"
-		},
-		{
-			"module_name": "Student Applicant",
-			"color": "#4d927f",
-			"icon": "octicon octicon-clippy",
-			"label": _("Student Applicant"),
-			"link": "List/Student Applicant",
-			"_doctype": "Student Applicant",
-			"type": "list"
-		},
-		{
-			"module_name": "Fees",
-			"color": "#83C21E",
-			"icon": "fa fa-money",
-			"label": _("Fees"),
-			"link": "List/Fees",
-			"_doctype": "Fees",
-			"type": "list"
-		},
-		{
-			"module_name": "Instructor",
-			"color": "#a99e4c",
-			"icon": "octicon octicon-broadcast",
-			"label": _("Instructor"),
-			"link": "List/Instructor",
-			"_doctype": "Instructor",
-			"type": "list"
-		},
-		{
-			"module_name": "Room",
-			"color": "#f22683",
-			"icon": "fa fa-map-marker",
-			"label": _("Room"),
-			"link": "List/Room",
-			"_doctype": "Room",
-			"type": "list"
-		},
-		{
-			"module_name": "Schools",
-			"color": "#DE2B37",
-			"icon": "octicon octicon-mortar-board",
-			"type": "module",
-			"label": _("Schools")
-		}
 	]

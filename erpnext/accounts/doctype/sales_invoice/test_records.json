@@ -3,6 +3,7 @@
   "company": "_Test Company",
   "conversion_rate": 1.0,
   "currency": "INR",
+  "cost_center": "_Test Cost Center - _TC",
   "customer": "_Test Customer",
   "customer_name": "_Test Customer",
   "debit_to": "_Test Receivable - _TC",
@@ -37,7 +38,8 @@
     "charge_type": "On Net Total",
     "description": "VAT",
     "doctype": "Sales Taxes and Charges",
-    "parentfield": "taxes",
+	"parentfield": "taxes",
+	"cost_center": "_Test Cost Center - _TC",
     "rate": 6
    },
    {
@@ -45,7 +47,8 @@
     "charge_type": "On Net Total",
     "description": "Service Tax",
     "doctype": "Sales Taxes and Charges",
-    "parentfield": "taxes",
+	"parentfield": "taxes",
+	"cost_center": "_Test Cost Center - _TC",
     "rate": 6.36
    }
   ],
@@ -68,8 +71,6 @@
   "selling_price_list": "_Test Price List",
   "territory": "_Test Territory"
  },
- 
- 
  {
   "company": "_Test Company",
   "conversion_rate": 1.0,
@@ -78,6 +79,7 @@
   "customer_name": "_Test Customer",
   "debit_to": "_Test Receivable - _TC",
   "doctype": "Sales Invoice",
+  "cost_center": "_Test Cost Center - _TC",
   "items": [
    {
     "amount": 500.0,
@@ -109,7 +111,8 @@
     "charge_type": "On Net Total",
     "description": "VAT",
     "doctype": "Sales Taxes and Charges",
-    "parentfield": "taxes",
+	"parentfield": "taxes",
+	"cost_center": "_Test Cost Center - _TC",
     "rate": 16
    },
    {
@@ -117,7 +120,8 @@
     "charge_type": "On Net Total",
     "description": "Service Tax",
     "doctype": "Sales Taxes and Charges",
-    "parentfield": "taxes",
+	"parentfield": "taxes",
+	"cost_center": "_Test Cost Center - _TC",
     "rate": 10
    }
   ],
@@ -134,6 +138,7 @@
   "customer_name": "_Test Customer",
   "debit_to": "_Test Receivable - _TC",
   "doctype": "Sales Invoice",
+  "cost_center": "_Test Cost Center - _TC",
   "items": [
    {
     "cost_center": "_Test Cost Center - _TC",
@@ -142,7 +147,7 @@
 	"expense_account": "_Test Account Cost for Goods Sold - _TC",
     "item_code": "_Test Item Home Desktop 100",
     "item_name": "_Test Item Home Desktop 100",
-    "item_tax_rate": "{\"_Test Account Excise Duty - _TC\": 10}",
+    "item_tax_template": "_Test Account Excise Duty @ 10",
     "parentfield": "items",
     "price_list_rate": 50,
     "qty": 10,
@@ -261,6 +266,7 @@
   "customer_name": "_Test Customer",
   "debit_to": "_Test Receivable - _TC",
   "doctype": "Sales Invoice",
+  "cost_center": "_Test Cost Center - _TC",
   "items": [
    {
     "cost_center": "_Test Cost Center - _TC",
@@ -269,14 +275,13 @@
 	"expense_account": "_Test Account Cost for Goods Sold - _TC",
     "item_code": "_Test Item Home Desktop 100",
     "item_name": "_Test Item Home Desktop 100",
-    "item_tax_rate": "{\"_Test Account Excise Duty - _TC\": 10}",
+    "item_tax_template": "_Test Account Excise Duty @ 10",
     "parentfield": "items",
     "price_list_rate": 62.5,
     "qty": 10,
 	  "uom": "_Test UOM 1",
 	  "conversion_factor": 1,
     "stock_uom": "_Test UOM 1"
-	
    },
    {
     "cost_center": "_Test Cost Center - _TC",

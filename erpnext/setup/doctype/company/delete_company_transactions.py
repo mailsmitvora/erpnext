@@ -8,6 +8,8 @@ from frappe.utils import cint
 from frappe import _
 from frappe.desk.notifications import clear_notifications
 
+import functools
+
 @frappe.whitelist()
 def delete_company_transactions(company_name):
 	frappe.only_for("System Manager")
@@ -24,9 +26,15 @@ def delete_company_transactions(company_name):
 		tabDocField where fieldtype='Link' and options='Company'"""):
 		if doctype not in ("Account", "Cost Center", "Warehouse", "Budget",
 			"Party Account", "Employee", "Sales Taxes and Charges Template",
-			"Purchase Taxes and Charges Template", "POS Profile", 'BOM'):
+			"Purchase Taxes and Charges Template", "POS Profile", "BOM",
+			"Company", "Bank Account", "Item Tax Template", "Mode Of Payment",
+			"Item Default"):
 				delete_for_doctype(doctype, company_name)
 
+	# reset company values
+	doc.total_monthly_sales = 0
+	doc.sales_monthly_history = None
+	doc.save()
 	# Clear notification counts
 	clear_notifications()
 
@@ -46,6 +54,11 @@ def delete_for_doctype(doctype, company_name):
 					(select name from `tab{1}` where `{2}`=%s)""".format(df.options,
 						doctype, company_fieldname), company_name)
 
+		#delete version log
+		frappe.db.sql("""delete from `tabVersion` where ref_doctype=%s and docname in
+			(select name from `tab{0}` where `{1}`=%s)""".format(doctype,
+				company_fieldname), (doctype, company_name))
+
 		# delete parent
 		frappe.db.sql("""delete from `tab{0}`
 			where {1}= %s """.format(doctype, company_fieldname), company_name)
@@ -53,7 +66,8 @@ def delete_for_doctype(doctype, company_name):
 		# reset series
 		naming_series = meta.get_field("naming_series")
 		if naming_series and naming_series.options:
-			prefixes = sorted(naming_series.options.split("\n"), lambda a, b: len(b) - len(a))
+			prefixes = sorted(naming_series.options.split("\n"),
+				key=functools.cmp_to_key(lambda a, b: len(b) - len(a)))
 
 			for prefix in prefixes:
 				if prefix:
@@ -77,24 +91,27 @@ def delete_lead_addresses(company_name):
 	leads = [ "'%s'"%row.get("name") for row in leads ]
 	addresses = []
 	if leads:
-		addresses = frappe.db.sql_list("""select parent from `tabDynamic Link` where link_name 
+		addresses = frappe.db.sql_list("""select parent from `tabDynamic Link` where link_name
 			in ({leads})""".format(leads=",".join(leads)))
 
 		if addresses:
-			addresses = ["'%s'"%addr for addr in addresses]
+			addresses = ["%s" % frappe.db.escape(addr) for addr in addresses]
 
-			frappe.db.sql("""delete from tabAddress where name in ({addresses}) and 
-				name not in (select distinct dl1.parent from `tabDynamic Link` dl1 
-				inner join `tabDynamic Link` dl2 on dl1.parent=dl2.parent 
+			frappe.db.sql("""delete from tabAddress where name in ({addresses}) and
+				name not in (select distinct dl1.parent from `tabDynamic Link` dl1
+				inner join `tabDynamic Link` dl2 on dl1.parent=dl2.parent
 				and dl1.link_doctype<>dl2.link_doctype)""".format(addresses=",".join(addresses)))
 
-			frappe.db.sql("""delete from `tabDynamic Link` where link_doctype='Lead' 
+			frappe.db.sql("""delete from `tabDynamic Link` where link_doctype='Lead'
 				and parenttype='Address' and link_name in ({leads})""".format(leads=",".join(leads)))
 
 		frappe.db.sql("""update tabCustomer set lead_name=NULL where lead_name in ({leads})""".format(leads=",".join(leads)))
 
 def delete_communications(doctype, company_name, company_fieldname):
-		frappe.db.sql("""
-			DELETE FROM `tabCommunication` WHERE reference_doctype = %s AND
-			EXISTS (SELECT name FROM `tab{0}` WHERE {1} = %s AND `tabCommunication`.reference_name = name)
-			""".format(doctype, company_fieldname), (doctype, company_name))
+		reference_docs = frappe.get_all(doctype, filters={company_fieldname:company_name})
+		reference_doc_names = [r.name for r in reference_docs]
+
+		communications = frappe.get_all("Communication", filters={"reference_doctype":doctype,"reference_name":["in", reference_doc_names]})
+		communication_names = [c.name for c in communications]
+
+		frappe.delete_doc("Communication", communication_names, ignore_permissions=True)

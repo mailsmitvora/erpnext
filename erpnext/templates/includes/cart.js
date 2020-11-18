@@ -4,7 +4,8 @@
 // js inside blog page
 
 // shopping cart
-frappe.provide("shopping_cart");
+frappe.provide("erpnext.shopping_cart");
+var shopping_cart = erpnext.shopping_cart;
 
 $.extend(shopping_cart, {
 	show_error: function(title, text) {
@@ -15,41 +16,33 @@ $.extend(shopping_cart, {
 	bind_events: function() {
 		shopping_cart.bind_address_select();
 		shopping_cart.bind_place_order();
+		shopping_cart.bind_request_quotation();
 		shopping_cart.bind_change_qty();
+		shopping_cart.bind_change_notes();
 		shopping_cart.bind_dropdown_cart_buttons();
+		shopping_cart.bind_coupon_code();
 	},
-	
+
 	bind_address_select: function() {
-		$(".cart-addresses").find('input[data-address-name]').on("click", function() {
-			if($(this).prop("checked")) {
-				var me = this;
-
-				// uncheck other shipping or billing addresses:
-				if ( $(this).is('input[data-fieldname=customer_address]') ) {
-					$('input[data-fieldname=customer_address]').not(this).prop('checked', false);
-				} else {
-					$('input[data-fieldname=shipping_address_name]').not(this).prop('checked', false);
-				}
-
-				return frappe.call({
-					type: "POST",
-					method: "erpnext.shopping_cart.cart.update_cart_address",
-					freeze: true,
-					args: {
-						address_fieldname: $(this).attr("data-fieldname"),
-						address_name: $(this).attr("data-address-name")
-					},
-					callback: function(r) {
-						if(!r.exc) {
-							$(".cart-tax-items").html(r.message.taxes);
-						}
+		$(".cart-addresses").on('click', '.address-card', function(e) {
+			const $card = $(e.currentTarget);
+			const address_type = $card.closest('[data-address-type]').attr('data-address-type');
+			const address_name = $card.closest('[data-address-name]').attr('data-address-name');
+			return frappe.call({
+				type: "POST",
+				method: "erpnext.shopping_cart.cart.update_cart_address",
+				freeze: true,
+				args: {
+					address_type,
+					address_name
+				},
+				callback: function(r) {
+					if(!r.exc) {
+						$(".cart-tax-items").html(r.message.taxes);
 					}
-				});
-			} else {
-				return false;
-			}
+				}
+			});
 		});
-
 	},
 
 	bind_place_order: function() {
@@ -58,20 +51,26 @@ $.extend(shopping_cart, {
 		});
 	},
 
+	bind_request_quotation: function() {
+		$('.btn-request-for-quotation').on('click', function() {
+			shopping_cart.request_quotation(this);
+		});
+	},
+
 	bind_change_qty: function() {
 		// bind update button
 		$(".cart-items").on("change", ".cart-qty", function() {
 			var item_code = $(this).attr("data-item-code");
 			var newVal = $(this).val();
-			shopping_cart.shopping_cart_update(item_code, newVal);
+			shopping_cart.shopping_cart_update({item_code, qty: newVal});
 		});
-		
-		$(".cart-items").on('click', '.number-spinner button', function () {  
+
+		$(".cart-items").on('click', '.number-spinner button', function () {
 			var btn = $(this),
 				input = btn.closest('.number-spinner').find('input'),
 				oldValue = input.val().trim(),
 				newVal = 0;
-	
+
 			if (btn.attr('data-dir') == 'up') {
 				newVal = parseInt(oldValue) + 1;
 			} else {
@@ -80,17 +79,31 @@ $.extend(shopping_cart, {
 				}
 			}
 			input.val(newVal);
-			var item_code = input.attr("data-item-code"); 
-			shopping_cart.shopping_cart_update(item_code, newVal);
+			var item_code = input.attr("data-item-code");
+			shopping_cart.shopping_cart_update({item_code, qty: newVal});
 		});
 	},
-	
+
+	bind_change_notes: function() {
+		$('.cart-items').on('change', 'textarea', function() {
+			const $textarea = $(this);
+			const item_code = $textarea.attr('data-item-code');
+			const qty = $textarea.closest('tr').find('.cart-qty').val();
+			const notes = $textarea.val();
+			shopping_cart.shopping_cart_update({
+				item_code,
+				qty,
+				additional_notes: notes
+			});
+		});
+	},
+
 	render_tax_row: function($cart_taxes, doc, shipping_rules) {
 		var shipping_selector;
 		if(shipping_rules) {
 			shipping_selector = '<select class="form-control">' + $.map(shipping_rules, function(rule) {
-					return '<option value="' + rule[0] + '">' + rule[1] + '</option>' }).join("\n") +
-				'</select>';
+				return '<option value="' + rule[0] + '">' + rule[1] + '</option>' }).join("\n") +
+			'</select>';
 		}
 
 		var $tax_row = $(repl('<div class="row">\
@@ -149,7 +162,57 @@ $.extend(shopping_cart, {
 						.html(msg || frappe._("Something went wrong!"))
 						.toggle(true);
 				} else {
-					window.location.href = "/orders/" + encodeURIComponent(r.message);
+					$('.cart-container table').hide();
+					$(btn).hide();
+					window.location.href = '/orders/' + encodeURIComponent(r.message);
+				}
+			}
+		});
+	},
+
+	request_quotation: function(btn) {
+		return frappe.call({
+			type: "POST",
+			method: "erpnext.shopping_cart.cart.request_for_quotation",
+			btn: btn,
+			callback: function(r) {
+				if(r.exc) {
+					var msg = "";
+					if(r._server_messages) {
+						msg = JSON.parse(r._server_messages || []).join("<br>");
+					}
+
+					$("#cart-error")
+						.empty()
+						.html(msg || frappe._("Something went wrong!"))
+						.toggle(true);
+				} else {
+					$('.cart-container table').hide();
+					$(btn).hide();
+					window.location.href = '/quotations/' + encodeURIComponent(r.message);
+				}
+			}
+		});
+	},
+
+	bind_coupon_code: function() {
+		$(".bt-coupon").on("click", function() {
+			shopping_cart.apply_coupon_code(this);
+		});
+	},
+
+	apply_coupon_code: function(btn) {
+		return frappe.call({
+			type: "POST",
+			method: "erpnext.shopping_cart.cart.apply_coupon_code",
+			btn: btn,
+			args : {
+				applied_code : $('.txtcoupon').val(),
+				applied_referral_sales_partner: $('.txtreferral_sales_partner').val()
+			},
+			callback: function(r) {
+				if (r && r.message){
+					location.reload();
 				}
 			}
 		});
@@ -162,6 +225,6 @@ frappe.ready(function() {
 });
 
 function show_terms() {
-  var html = $(".cart-terms").html();
-    frappe.msgprint(html);
+	var html = $(".cart-terms").html();
+	frappe.msgprint(html);
 }

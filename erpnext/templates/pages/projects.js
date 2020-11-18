@@ -3,7 +3,7 @@ frappe.ready(function() {
 	$('.task-status-switch').on('click', function() {
 		var $btn = $(this);
 		if($btn.attr('data-status')==='Open') {
-			reload_items('closed', 'task', $btn);
+			reload_items('completed', 'task', $btn);
 		} else {
 			reload_items('open', 'task', $btn);
 		}
@@ -13,7 +13,7 @@ frappe.ready(function() {
 	$('.issue-status-switch').on('click', function() {
 		var $btn = $(this);
 		if($btn.attr('data-status')==='Open') {
-			reload_items('closed', 'issue', $btn);
+			reload_items('completed', 'issue', $btn);
 		} else {
 			reload_items('open', 'issue', $btn);
 		}
@@ -36,6 +36,10 @@ frappe.ready(function() {
 		more_items('timeline', false);
 	});
 
+	$(".file-size").each(function() {
+		$(this).text(frappe.form.formatters.FileSize($(this).text()));
+	});
+
 
 	var reload_items = function(item_status, item, $btn) {
 		$.ajax({
@@ -47,7 +51,6 @@ frappe.ready(function() {
 				project: '{{ doc.name }}',
 				item_status: item_status,
 			},
-			dataType: "json",
 			success: function(data) {
 				if(typeof data.message == 'undefined') {
 					$('.project-'+ item).html("No "+ item_status +" "+ item);
@@ -58,9 +61,9 @@ frappe.ready(function() {
 
 				// update status
 				if(item_status==='open') {
-					$btn.html(__('Show closed')).attr('data-status', 'Open');
+					$btn.html(__('Show Completed')).attr('data-status', 'Open');
 				} else {
-					$btn.html(__('Show open')).attr('data-status', 'Closed');
+					$btn.html(__('Show Open')).attr('data-status', 'Completed');
 				}
 			}
 		});
@@ -68,10 +71,9 @@ frappe.ready(function() {
 	}
 
 	var more_items = function(item, item_status){
-		if(item_status)
-		{
-			var item_status = $('.project-'+ item +'-section .btn-group .bold').hasClass('btn-closed-'+ item)
-				? 'closed' : 'open';
+		if(item_status) {
+			var item_status = $('.project-'+ item +'-section .btn-group .bold').hasClass('btn-completed-'+ item)
+				? 'completed' : 'open';
 		}
 		$.ajax({
 			method: "GET",
@@ -83,14 +85,13 @@ frappe.ready(function() {
 				start: start,
 				item_status: item_status,
 			},
-			dataType: "json",
 			success: function(data) {
 
 				$(data.message).appendTo('.project-'+ item);
 				if(typeof data.message == 'undefined') {
 					$(".more-"+ item).toggle(false);
 				}
-			start = start+10;
+				start = start+10;
 			}
 		});
 	}

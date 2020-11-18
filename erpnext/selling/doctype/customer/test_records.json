@@ -1,6 +1,20 @@
 [
  {
   "customer_group": "_Test Customer Group",
+  "customer_name": "_Test Customer With Template",
+  "customer_type": "Individual",
+  "doctype": "Customer",
+  "territory": "_Test Territory"
+ },
+ {
+  "customer_group": "_Test Customer Group",
+  "customer_name": "_Test Customer P",
+  "customer_type": "Individual",
+  "doctype": "Customer",
+  "territory": "_Test Territory"
+ },
+ {
+  "customer_group": "_Test Customer Group",
   "customer_name": "_Test Customer",
   "customer_type": "Individual",
   "doctype": "Customer",
@@ -37,5 +51,13 @@
 	  "company": "_Test Company",
 	  "account": "_Test Receivable USD - _TC"
   }]
+ },
+ {
+  "customer_group": "_Test Customer Group",
+  "customer_name": "_Test Customer With Tax Category",
+  "customer_type": "Individual",
+  "doctype": "Customer",
+  "territory": "_Test Territory",
+  "tax_category": "_Test Tax Category 1"
  }
 ]

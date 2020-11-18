@@ -24,6 +24,19 @@ frappe.ui.form.on('Batch', {
 			frm.trigger('make_dashboard');
 		}
 	},
+	item: (frm) => {
+		// frappe.db.get_value('Item', {name: frm.doc.item}, 'has_expiry_date', (r) => {
+		// 	frm.toggle_reqd('expiry_date', r.has_expiry_date);
+		// });
+		frappe.db.get_value('Item', {name: frm.doc.item}, ['shelf_life_in_days', 'has_expiry_date'], (r) => {
+			if (r.has_expiry_date && r.shelf_life_in_days) {
+				// Calculate expiry date based on shelf_life_in_days
+				frm.set_value('expiry_date', frappe.datetime.add_days(frm.doc.manufacturing_date, r.shelf_life_in_days));
+			}else if(r.has_expiry_date){
+				frm.toggle_reqd('expiry_date', r.has_expiry_date);
+			}
+		})
+	},
 	make_dashboard: (frm) => {
 		if(!frm.is_new()) {
 			frappe.call({
@@ -65,12 +78,17 @@ frappe.ui.form.on('Batch', {
 					// move - ask for target warehouse and make stock entry
 					rows.find('.btn-move').on('click', function() {
 						var $btn = $(this);
-						frappe.prompt({
+						const fields = [
+							{
 								fieldname: 'to_warehouse',
 								label: __('To Warehouse'),
 								fieldtype: 'Link',
 								options: 'Warehouse'
-							},
+							}
+						];
+
+						frappe.prompt(
+							fields,
 							(data) => {
 								frappe.call({
 									method: 'erpnext.stock.doctype.stock_entry.stock_entry_utils.make_stock_entry',
@@ -79,7 +97,9 @@ frappe.ui.form.on('Batch', {
 										batch_no: frm.doc.name,
 										qty: $btn.attr('data-qty'),
 										from_warehouse: $btn.attr('data-warehouse'),
-										to_warehouse: data.to_warehouse
+										to_warehouse: data.to_warehouse,
+										source_document: frm.doc.reference_name,
+										reference_doctype: frm.doc.reference_doctype
 									},
 									callback: (r) => {
 										frappe.show_alert(__('Stock Entry {0} created',
@@ -90,7 +110,7 @@ frappe.ui.form.on('Batch', {
 							},
 							__('Select Target Warehouse'),
 							__('Move')
-						)
+						);
 					});
 
 					// split - ask for new qty and batch ID (optional)
@@ -98,34 +118,34 @@ frappe.ui.form.on('Batch', {
 					rows.find('.btn-split').on('click', function() {
 						var $btn = $(this);
 						frappe.prompt([{
-								fieldname: 'qty',
-								label: __('New Batch Qty'),
-								fieldtype: 'Float',
-								'default': $btn.attr('data-qty')
-							},
-							{
-								fieldname: 'new_batch_id',
-								label: __('New Batch ID (Optional)'),
-								fieldtype: 'Data',
-							}],
-							(data) => {
-								frappe.call({
-									method: 'erpnext.stock.doctype.batch.batch.split_batch',
-									args: {
-										item_code: frm.doc.item,
-										batch_no: frm.doc.name,
-										qty: data.qty,
-										warehouse: $btn.attr('data-warehouse'),
-										new_batch_id: data.new_batch_id
-									},
-									callback: (r) => {
-										frm.refresh();
-									},
-								});
-							},
-							__('Split Batch'),
-							__('Split')
-						)
+							fieldname: 'qty',
+							label: __('New Batch Qty'),
+							fieldtype: 'Float',
+							'default': $btn.attr('data-qty')
+						},
+						{
+							fieldname: 'new_batch_id',
+							label: __('New Batch ID (Optional)'),
+							fieldtype: 'Data',
+						}],
+						(data) => {
+							frappe.call({
+								method: 'erpnext.stock.doctype.batch.batch.split_batch',
+								args: {
+									item_code: frm.doc.item,
+									batch_no: frm.doc.name,
+									qty: data.qty,
+									warehouse: $btn.attr('data-warehouse'),
+									new_batch_id: data.new_batch_id
+								},
+								callback: (r) => {
+									frm.refresh();
+								},
+							});
+						},
+						__('Split Batch'),
+						__('Split')
+						);
 					})
 
 					frm.dashboard.show();
@@ -135,3 +155,11 @@ frappe.ui.form.on('Batch', {
 	}
 })
 
+frappe.ui.form.on('Batch', 'manufacturing_date', function (frm){
+	frappe.db.get_value('Item', {name: frm.doc.item}, ['shelf_life_in_days', 'has_expiry_date'], (r) => {
+		if (r.has_expiry_date && r.shelf_life_in_days) {
+			// Calculate expiry date based on shelf_life_in_days
+			frm.set_value('expiry_date', frappe.datetime.add_days(frm.doc.manufacturing_date, r.shelf_life_in_days));
+		}
+	})
+})

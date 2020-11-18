@@ -1,10 +1,11 @@
+
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
 import frappe
 import json
-from frappe.utils import cint, getdate, formatdate
+from frappe.utils import cint, getdate, formatdate, today
 from frappe import throw, _
 from frappe.model.document import Document
 
@@ -13,6 +14,7 @@ class OverlapError(frappe.ValidationError): pass
 class HolidayList(Document):
 	def validate(self):
 		self.validate_days()
+		self.total_holidays = len(self.holidays)
 
 	def get_weekly_off_dates(self):
 		self.validate_values()
@@ -22,6 +24,7 @@ class HolidayList(Document):
 			ch = self.append('holidays', {})
 			ch.description = self.weekly_off
 			ch.holiday_date = d
+			ch.weekly_off = 1
 			ch.idx = last_idx + i + 1
 
 	def validate_values(self):
@@ -30,7 +33,7 @@ class HolidayList(Document):
 
 
 	def validate_days(self):
-		if self.from_date > self.to_date:
+		if getdate(self.from_date) > getdate(self.to_date):
 			throw(_("To Date cannot be before From Date"))
 
 		for day in self.get("holidays"):
@@ -69,27 +72,27 @@ def get_events(start, end, filters=None):
 	:param end: End date-time.
 	:param filters: Filters (JSON).
 	"""
-	condition = ''
-	values = {
-		"start_date": getdate(start),
-		"end_date": getdate(end)
-	}
-
 	if filters:
-		if isinstance(filters, basestring):
-			filters = json.loads(filters)
+		filters = json.loads(filters)
+	else:
+		filters = []
 
-		if filters.get('holiday_list'):
-			condition = 'and hlist.name=%(holiday_list)s'
-			values['holiday_list'] = filters['holiday_list']
+	if start:
+		filters.append(['Holiday', 'holiday_date', '>', getdate(start)])
+	if end:
+		filters.append(['Holiday', 'holiday_date', '<', getdate(end)])
 
-	data = frappe.db.sql("""select hlist.name, h.holiday_date, h.description
-		from `tabHoliday List` hlist, tabHoliday h
-		where h.parent = hlist.name
-		and h.holiday_date is not null
-		and h.holiday_date >= %(start_date)s
-		and h.holiday_date <= %(end_date)s
-		{condition}""".format(condition=condition),
-		values, as_dict=True, update={"allDay": 1})
+	return frappe.get_list('Holiday List',
+		fields=['name', '`tabHoliday`.holiday_date', '`tabHoliday`.description', '`tabHoliday List`.color'],
+		filters = filters,
+		update={"allDay": 1})
 
-	return data
+
+def is_holiday(holiday_list, date=today()):
+	"""Returns true if the given date is a holiday in the given holiday list
+	"""
+	if holiday_list:
+		return bool(frappe.get_all('Holiday List',
+			dict(name=holiday_list, holiday_date=date)))
+	else:
+		return False

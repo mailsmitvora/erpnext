@@ -12,8 +12,8 @@ from erpnext.stock.utils import get_valid_serial_nos
 from erpnext.utilities.transaction_base import TransactionBase
 
 class InstallationNote(TransactionBase):
-	def __init__(self, arg1, arg2=None):
-		super(InstallationNote, self).__init__(arg1, arg2)
+	def __init__(self, *args, **kwargs):
+		super(InstallationNote, self).__init__(*args, **kwargs)
 		self.status_updater = [{
 			'source_dt': 'Installation Note Item',
 			'target_dt': 'Delivery Note Item',
@@ -33,8 +33,8 @@ class InstallationNote(TransactionBase):
 		self.validate_installation_date()
 		self.check_item_table()
 
-		from erpnext.controllers.selling_controller import check_active_sales_items
-		check_active_sales_items(self)
+		from erpnext.controllers.selling_controller import set_default_income_account_for_item
+		set_default_income_account_for_item(self)
 
 	def is_serial_no_added(self, item_code, serial_no):
 		has_serial_no = frappe.db.get_value("Item", item_code, "has_serial_no")

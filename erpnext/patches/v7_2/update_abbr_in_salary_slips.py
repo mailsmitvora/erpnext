@@ -1,7 +1,8 @@
+from __future__ import unicode_literals
 import frappe
 
 def execute():
-	frappe.reload_doctype('Salary Slip')
+	frappe.reload_doc('Payroll', 'doctype', 'Salary Slip')
 	if not frappe.db.has_column('Salary Detail', 'abbr'):
 		return
 

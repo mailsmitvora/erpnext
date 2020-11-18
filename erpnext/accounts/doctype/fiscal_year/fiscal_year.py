@@ -9,6 +9,8 @@ from dateutil.relativedelta import relativedelta
 
 from frappe.model.document import Document
 
+class FiscalYearIncorrectDate(frappe.ValidationError): pass
+
 class FiscalYear(Document):
 	def set_as_default(self):
 		frappe.db.set_value("Global Defaults", None, "current_fiscal_year", self.name)
@@ -34,12 +36,20 @@ class FiscalYear(Document):
 					frappe.throw(_("Cannot change Fiscal Year Start Date and Fiscal Year End Date once the Fiscal Year is saved."))
 
 	def validate_dates(self):
-		if getdate(self.year_start_date) > getdate(self.year_end_date):
-			frappe.throw(_("Fiscal Year Start Date should not be greater than Fiscal Year End Date"))
+		if self.is_short_year:
+			# Fiscal Year can be shorter than one year, in some jurisdictions
+			# under certain circumstances. For example, in the USA and Germany.
+			return
 
-		if (getdate(self.year_end_date) - getdate(self.year_start_date)).days > 366:
-			date = getdate(self.year_start_date) + relativedelta(years=1) - relativedelta(days=1)
-			self.year_end_date = date.strftime("%Y-%m-%d")
+		if getdate(self.year_start_date) > getdate(self.year_end_date):
+			frappe.throw(_("Fiscal Year Start Date should be one year earlier than Fiscal Year End Date"),
+				FiscalYearIncorrectDate)
+
+		date = getdate(self.year_start_date) + relativedelta(years=1) - relativedelta(days=1)
+
+		if getdate(self.year_end_date) != date:
+			frappe.throw(_("Fiscal Year End Date should be one year after Fiscal Year Start Date"),
+				FiscalYearIncorrectDate)
 
 	def on_update(self):
 		check_duplicate_fiscal_year(self)
@@ -104,7 +114,15 @@ def auto_create_fiscal_year():
 			start_year = cstr(new_fy.year_start_date.year)
 			end_year = cstr(new_fy.year_end_date.year)
 			new_fy.year = start_year if start_year==end_year else (start_year + "-" + end_year)
+			new_fy.auto_created = 1
 
 			new_fy.insert(ignore_permissions=True)
 		except frappe.NameError:
 			pass
+
+def get_from_and_to_date(fiscal_year):
+	fields = [
+		"year_start_date as from_date",
+		"year_end_date as to_date"
+	]
+	return frappe.db.get_value("Fiscal Year", fiscal_year, fields, as_dict=1)

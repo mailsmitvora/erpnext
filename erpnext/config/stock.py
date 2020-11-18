@@ -9,22 +9,36 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Stock Entry",
-					"description": _("Record item movement."),
+					"onboard": 1,
+					"dependencies": ["Item"],
 				},
 				{
 					"type": "doctype",
 					"name": "Delivery Note",
-					"description": _("Shipments to customers."),
+					"onboard": 1,
+					"dependencies": ["Item", "Customer"],
 				},
 				{
 					"type": "doctype",
 					"name": "Purchase Receipt",
-					"description": _("Goods received from Suppliers."),
+					"onboard": 1,
+					"dependencies": ["Item", "Supplier"],
 				},
 				{
 					"type": "doctype",
 					"name": "Material Request",
-					"description": _("Requests for items."),
+					"onboard": 1,
+					"dependencies": ["Item"],
+				},
+				{
+					"type": "doctype",
+					"name": "Pick List",
+					"onboard": 1,
+					"dependencies": ["Item"],
+				},
+				{
+					"type": "doctype",
+					"name": "Delivery Trip"
 				},
 			]
 		},
@@ -36,31 +50,80 @@ def get_data():
 					"is_query_report": True,
 					"name": "Stock Ledger",
 					"doctype": "Stock Ledger Entry",
+					"onboard": 1,
+					"dependencies": ["Item"],
 				},
 				{
 					"type": "report",
 					"is_query_report": True,
 					"name": "Stock Balance",
-					"doctype": "Stock Ledger Entry"
+					"doctype": "Stock Ledger Entry",
+					"onboard": 1,
+					"dependencies": ["Item"],
 				},
 				{
 					"type": "report",
 					"is_query_report": True,
 					"name": "Stock Projected Qty",
 					"doctype": "Item",
+					"onboard": 1,
+					"dependencies": ["Item"],
 				},
 				{
 					"type": "page",
 					"name": "stock-balance",
-					"label": _("Stock Summary")
+					"label": _("Stock Summary"),
+					"dependencies": ["Item"],
 				},
 				{
 					"type": "report",
 					"is_query_report": True,
 					"name": "Stock Ageing",
 					"doctype": "Item",
+					"dependencies": ["Item"],
 				},
-
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Item Price Stock",
+					"doctype": "Item",
+					"dependencies": ["Item"],
+				}
+			]
+		},
+		{
+			"label": _("Settings"),
+			"icon": "fa fa-cog",
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Stock Settings",
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "Warehouse",
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "UOM",
+					"label": _("Unit of Measure") + " (UOM)",
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "Brand",
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "Item Attribute",
+				},
+				{
+					"type": "doctype",
+					"name": "Item Variant Settings",
+				},
 			]
 		},
 		{
@@ -69,17 +132,12 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Item",
-					"description": _("All Products or Services."),
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
 					"name": "Product Bundle",
-					"description": _("Bundle items at time of sale."),
-				},
-				{
-					"type": "doctype",
-					"name": "Price List",
-					"description": _("Price List master.")
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
@@ -87,25 +145,36 @@ def get_data():
 					"icon": "fa fa-sitemap",
 					"label": _("Item Group"),
 					"link": "Tree/Item Group",
-					"description": _("Tree of Item Groups."),
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "Price List",
 				},
 				{
 					"type": "doctype",
 					"name": "Item Price",
-					"description": _("Multiple Item prices."),
-					"route": "Report/Item Price"
 				},
 				{
 					"type": "doctype",
 					"name": "Shipping Rule",
-					"description": _("Rules for adding shipping costs.")
 				},
 				{
 					"type": "doctype",
 					"name": "Pricing Rule",
-					"description": _("Rules for applying pricing and discount.")
 				},
-
+				{
+					"type": "doctype",
+					"name": "Item Alternative",
+				},
+				{
+					"type": "doctype",
+					"name": "Item Manufacturer",
+				},
+				{
+					"type": "doctype",
+					"name": "Item Variant Settings",
+				},
 			]
 		},
 		{
@@ -114,17 +183,19 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Serial No",
-					"description": _("Single unit of an Item."),
+					"onboard": 1,
+					"dependencies": ["Item"],
 				},
 				{
 					"type": "doctype",
 					"name": "Batch",
-					"description": _("Batch (lot) of an Item."),
+					"onboard": 1,
+					"dependencies": ["Item"],
 				},
 				{
 					"type": "doctype",
 					"name": "Installation Note",
-					"description": _("Installation record for a Serial No.")
+					"dependencies": ["Item"],
 				},
 				{
 					"type": "report",
@@ -150,59 +221,34 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Stock Reconciliation",
-					"description": _("Upload stock balance via csv.")
-				},
-				{
-					"type": "doctype",
-					"name": "Packing Slip",
-					"description": _("Split Delivery Note into packages.")
-				},
-				{
-					"type": "doctype",
-					"name": "Quality Inspection",
-					"description": _("Incoming quality inspection.")
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
 					"name": "Landed Cost Voucher",
-					"description": _("Update additional costs to calculate landed cost of items"),
-				}
-			]
-		},
-		{
-			"label": _("Setup"),
-			"icon": "fa fa-cog",
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Stock Settings",
-					"description": _("Default settings for stock transactions.")
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
-					"name": "Warehouse",
-					"description": _("Where items are stored."),
+					"name": "Packing Slip",
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
-					"name": "UOM",
-					"label": _("Unit of Measure") + " (UOM)",
-					"description": _("e.g. Kg, Unit, Nos, m")
+					"name": "Quality Inspection",
 				},
 				{
 					"type": "doctype",
-					"name": "Item Attribute",
-					"description": _("Attributes for Item Variants. e.g Size, Color etc."),
+					"name": "Quality Inspection Template",
 				},
 				{
 					"type": "doctype",
-					"name": "Brand",
-					"description": _("Brand master.")
+					"name": "Quick Stock Balance",
 				},
 			]
 		},
 		{
-			"label": _("Analytics"),
+			"label": _("Key Reports"),
 			"icon": "fa fa-table",
 			"items": [
 				{
@@ -210,12 +256,14 @@ def get_data():
 					"is_query_report": False,
 					"name": "Item-wise Price List Rate",
 					"doctype": "Item Price",
+					"onboard": 1,
 				},
 				{
-					"type": "page",
-					"name": "stock-analytics",
-					"label": _("Stock Analytics"),
-					"icon": "fa fa-bar-chart"
+					"type": "report",
+					"is_query_report": True,
+					"name": "Stock Analytics",
+					"doctype": "Stock Entry",
+					"onboard": 1,
 				},
 				{
 					"type": "report",
@@ -229,13 +277,6 @@ def get_data():
 					"name": "Purchase Receipt Trends",
 					"doctype": "Purchase Receipt"
 				},
-
-			]
-		},
-		{
-			"label": _("Reports"),
-			"icon": "fa fa-list",
-			"items": [
 				{
 					"type": "report",
 					"is_query_report": True,
@@ -250,21 +291,27 @@ def get_data():
 				},
 				{
 					"type": "report",
-					"name": "Item Shortage Report",
-					"route": "Report/Bin/Item Shortage Report",
-					"doctype": "Purchase Receipt"
-				},
-				{
-					"type": "report",
 					"is_query_report": True,
-					"name": "Requested Items To Be Transferred",
-					"doctype": "Material Request"
+					"name": "Item Shortage Report",
+					"doctype": "Bin"
 				},
 				{
 					"type": "report",
 					"is_query_report": True,
 					"name": "Batch-Wise Balance History",
 					"doctype": "Batch"
+				},
+			]
+		},
+		{
+			"label": _("Other Reports"),
+			"icon": "fa fa-list",
+			"items": [
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Requested Items To Be Transferred",
+					"doctype": "Material Request"
 				},
 				{
 					"type": "report",
@@ -284,47 +331,31 @@ def get_data():
 					"name": "Itemwise Recommended Reorder Level",
 					"doctype": "Item"
 				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Item Variant Details",
+					"doctype": "Item"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Subcontracted Raw Materials To Be Transferred",
+					"doctype": "Purchase Order"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Subcontracted Item To Be Received",
+					"doctype": "Purchase Order"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Stock and Account Value Comparison",
+					"doctype": "Stock Ledger Entry"
+				}
 			]
 		},
-		{
-			"label": _("Help"),
-			"icon": "fa fa-facetime-video",
-			"items": [
-				{
-					"type": "help",
-					"label": _("Items and Pricing"),
-					"youtube_id": "qXaEwld4_Ps"
-				},
-				{
-					"type": "help",
-					"label": _("Item Variants"),
-					"youtube_id": "OGBETlCzU5o"
-				},
-				{
-					"type": "help",
-					"label": _("Opening Stock Balance"),
-					"youtube_id": "0yPgrtfeCTs"
-				},
-				{
-					"type": "help",
-					"label": _("Making Stock Entries"),
-					"youtube_id": "Njt107hlY3I"
-				},
-				{
-					"type": "help",
-					"label": _("Serialized Inventory"),
-					"youtube_id": "gvOVlEwFDAk"
-				},
-				{
-					"type": "help",
-					"label": _("Batch Inventory"),
-					"youtube_id": "J0QKl7ABPKM"
-				},
-				{
-					"type": "help",
-					"label": _("Managing Subcontracting"),
-					"youtube_id": "ThiMCC2DtKo"
-				},
-			]
-		}
+
 	]

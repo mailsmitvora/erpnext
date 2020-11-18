@@ -1,8 +1,9 @@
+from __future__ import unicode_literals
 import frappe
 from frappe import _
 
 def execute():
-	from erpnext.setup.setup_wizard.install_fixtures import default_lead_sources
+	from erpnext.setup.setup_wizard.operations.install_fixtures import default_lead_sources
 
 	frappe.reload_doc('selling', 'doctype', 'lead_source')
 

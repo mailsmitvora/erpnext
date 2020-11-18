@@ -10,12 +10,18 @@ def get_data():
 					"type": "doctype",
 					"name": "Issue",
 					"description": _("Support queries from customers."),
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
-					"name": "Communication",
-					"description": _("Communication log."),
+					"name": "Issue Type",
+					"description": _("Issue Type."),
 				},
+				{
+					"type": "doctype",
+					"name": "Issue Priority",
+					"description": _("Issue Priority."),
+				}
 			]
 		},
 		{
@@ -34,6 +40,34 @@ def get_data():
 			]
 		},
 		{
+			"label": _("Service Level Agreement"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Service Level",
+					"description": _("Service Level."),
+				},
+				{
+					"type": "doctype",
+					"name": "Service Level Agreement",
+					"description": _("Service Level Agreement."),
+				}
+			]
+		},
+		{
+			"label": _("Maintenance"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Maintenance Schedule",
+				},
+				{
+					"type": "doctype",
+					"name": "Maintenance Visit",
+				},
+			]
+		},
+		{
 			"label": _("Reports"),
 			"icon": "fa fa-list",
 			"items": [
@@ -48,6 +82,23 @@ def get_data():
 					"name": "Minutes to First Response for Issues",
 					"doctype": "Issue",
 					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Support Hours",
+					"doctype": "Issue",
+					"is_query_report": True
+				},
+			]
+		},
+		{
+			"label": _("Settings"),
+			"icon": "fa fa-list",
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Support Settings",
+					"label": _("Support Settings"),
 				},
 			]
 		},

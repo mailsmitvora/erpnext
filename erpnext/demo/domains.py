@@ -5,7 +5,7 @@ data = {
 		'company_name': 'Wind Power LLC'
 	},
 	'Retail': {
-		'company_name': 'Annapurna Dairy Shop',
+		'company_name': 'Mobile Next',
 	},
 	'Distribution': {
 		'company_name': 'Soltice Hardware',
@@ -15,5 +15,14 @@ data = {
 	},
 	'Education': {
 		'company_name': 'Whitmore College'
+	},
+	'Healthcare': {
+		'company_name': 'ABC Hospital Ltd.'
+	},
+	'Agriculture': {
+		'company_name': 'Schrute Farms'
+  },
+	'Non Profit': {
+		'company_name': 'Erpnext Foundation'
 	}
 }

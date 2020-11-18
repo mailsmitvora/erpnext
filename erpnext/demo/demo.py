@@ -3,8 +3,9 @@ from __future__ import unicode_literals
 import frappe, sys
 import erpnext
 import frappe.utils
-from erpnext.demo.user import hr, sales, purchase, manufacturing, stock, accounts, projects, fixed_asset, schools
-from erpnext.demo.setup import education, manufacture, setup_data
+from erpnext.demo.user import hr, sales, purchase, manufacturing, stock, accounts, projects, fixed_asset
+from erpnext.demo.user import education as edu
+from erpnext.demo.setup import education, manufacture, setup_data, healthcare, retail
 """
 Make a demo
 
@@ -22,29 +23,35 @@ bench --site demo.erpnext.dev execute erpnext.demo.demo.simulate
 
 """
 
-def make(domain='Manufacturing'):
+def make(domain='Manufacturing', days=100):
 	frappe.flags.domain = domain
 	frappe.flags.mute_emails = True
 	setup_data.setup(domain)
 	if domain== 'Manufacturing':
 		manufacture.setup_data()
+	elif domain == "Retail":
+		retail.setup_data()
 	elif domain== 'Education':
 		education.setup_data()
+	elif domain== 'Healthcare':
+		healthcare.setup_data()
 
 	site = frappe.local.site
 	frappe.destroy()
 	frappe.init(site)
 	frappe.connect()
-	simulate(domain)
 
-def simulate(domain='Manufacturing'):
-	runs_for = frappe.flags.runs_for or 150
+	simulate(domain, days)
+
+def simulate(domain='Manufacturing', days=100):
+	runs_for = frappe.flags.runs_for or days
 	frappe.flags.company = erpnext.get_default_company()
 	frappe.flags.mute_emails = True
 
 	if not frappe.flags.start_date:
 		# start date = 100 days back
-		frappe.flags.start_date = frappe.utils.add_days(frappe.utils.nowdate(), -1 * runs_for)
+		frappe.flags.start_date = frappe.utils.add_days(frappe.utils.nowdate(),
+			-1 * runs_for)
 
 	current_date = frappe.utils.getdate(frappe.flags.start_date)
 
@@ -59,7 +66,7 @@ def simulate(domain='Manufacturing'):
 		# runs_for = 100
 
 	fixed_asset.work()
-	for i in xrange(runs_for):
+	for i in range(runs_for):
 		sys.stdout.write("\rSimulating {0}: Day {1}".format(
 			current_date.strftime("%Y-%m-%d"), i))
 		sys.stdout.flush()
@@ -73,13 +80,13 @@ def simulate(domain='Manufacturing'):
 			stock.work()
 			accounts.work()
 			projects.run_projects(current_date)
-			#run_messages()
+			sales.work(domain)
+			# run_messages()
 
 			if domain=='Manufacturing':
-				sales.work()
 				manufacturing.work()
 			elif domain=='Education':
-				schools.work()
+				edu.work()
 
 		except:
 			frappe.db.set_global('demo_last_date', current_date)
